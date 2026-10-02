@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="tekstil_dashboard.Dashboard">
-        <div class="o_tekstil_dashboard_root">
+        <div class="o_tekstil_dashboard_root o_action">
             <t t-if="state.loading">
                 <div class="loading-state">
                     <div class="spinner-border text-primary" role="status"></div>
                     <span class="ms-2">Odoo ma'lumotlari yuklanmoqda...</span>
                 </div>
             </t>
-            <t t-elif="state.data">
+            <t t-else="">
                 <div class="app-layout">
                     <!-- ======================================================== -->
                     <!-- ASOSIY CHAP SIDEBAR                                      -->
@@ -797,7 +797,7 @@
                     <!-- ======================================================== -->
                     <!-- MODAL: AKT-SVERKA (SOLISHTIRMA DALOLATNOMA)             -->
                     <!-- ======================================================== -->
-                    <t t-if="state.activeModal === 'statement' and state.selectedClient">
+                    <t t-if="state.activeModal === 'statement' &amp;&amp; state.selectedClient">
                         <div class="modal-overlay" t-on-click.self="() => this.closeModal()">
                             <div class="modal-box modal-box-lg">
                                 <div class="modal-header">
