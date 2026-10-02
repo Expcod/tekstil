@@ -133,7 +133,7 @@ export class TekstilManufacturingDashboard extends Component {
     // -------------------------------------------------------------------------
     async advanceBatch(batchId) {
         try {
-            await this.orm.call("tekstil.dashboard.service", "batch_move_next_stage", [batchId]);
+            await this.orm.call("tekstil.dashboard.service", "batch_move_next_stage", [batchId], { batch_id: batchId });
             this.notification.add("Partiya keyingi bosqichga o'tkazildi!", { type: "success" });
             await this.loadData();
         } catch (e) {
@@ -212,7 +212,14 @@ export class TekstilManufacturingDashboard extends Component {
                 parseFloat(quantity),
                 dept,
                 parseFloat(pieceRate),
-            ]);
+            ], {
+                employee_id: parseInt(employeeId),
+                batch_id: parseInt(batchId),
+                operation_name: operationName,
+                quantity: parseFloat(quantity),
+                department: dept,
+                piece_rate: parseFloat(pieceRate),
+            });
             if (res && res.success) {
                 this.notification.add(res.message || "Bajarilgan ish muvaffaqiyatli saqlandi!", { type: "success" });
                 // Miqdorni tozalash
@@ -269,7 +276,16 @@ export class TekstilManufacturingDashboard extends Component {
                 parseFloat(reject),
                 defectIds,
                 note,
-            ]);
+            ], {
+                batch_id: parseInt(batchId),
+                inspected_qty: parseFloat(inspectedQty),
+                grade_1_qty: parseFloat(grade1),
+                grade_2_qty: parseFloat(grade2),
+                rework_qty: parseFloat(rework),
+                reject_qty: parseFloat(reject),
+                defect_type_ids: defectIds,
+                note: note,
+            });
             if (res && res.success) {
                 this.notification.add(res.message || "OTK xulosasi tasdiqlandi!", { type: "success" });
                 await this.loadData();
