@@ -1,0 +1,863 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="tekstil_dashboard.Dashboard">
+        <div class="o_tekstil_dashboard_root">
+            <t t-if="state.loading">
+                <div class="loading-state">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <span class="ms-2">Odoo ma'lumotlari yuklanmoqda...</span>
+                </div>
+            </t>
+            <t t-elif="state.data">
+                <div class="app-layout">
+                    <!-- ======================================================== -->
+                    <!-- ASOSIY CHAP SIDEBAR                                      -->
+                    <!-- ======================================================== -->
+                    <aside class="app-sidebar">
+                        <div class="sidebar-header">
+                            <div class="sidebar-brand" t-on-click="() => this.switchTab('dashboard')">
+                                <div class="brand-icon">⚡</div>
+                                <div class="brand-info">
+                                    <div class="brand-name">Tekstil ERP</div>
+                                    <div class="brand-sub">Tikuv &amp; Ishlab chiqarish</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <nav class="sidebar-nav">
+                            <div class="nav-section-label">ASOSIY MENYU</div>
+
+                            <button type="button" t-attf-class="sidebar-nav-item #{state.activeTab === 'dashboard' ? 'active' : ''}" t-on-click="() => this.switchTab('dashboard')">
+                                <span class="nav-icon">📊</span>
+                                <span class="nav-text">Boshqaruv</span>
+                            </button>
+
+                            <button type="button" t-attf-class="sidebar-nav-item #{state.activeTab === 'conveyor' ? 'active' : ''}" t-on-click="() => this.switchTab('conveyor')">
+                                <span class="nav-icon">🔄</span>
+                                <span class="nav-text">Konveyer &amp; BoM</span>
+                                <span class="sidebar-badge badge-blue">
+                                    <t t-esc="state.data.conveyor.total_in_progress"/>
+                                </span>
+                            </button>
+
+                            <button type="button" t-attf-class="sidebar-nav-item #{state.activeTab === 'raw_materials' ? 'active' : ''}" t-on-click="() => this.switchTab('raw_materials')">
+                                <span class="nav-icon">🧵</span>
+                                <span class="nav-text">Xomashyo Ombori</span>
+                            </button>
+
+                            <button type="button" t-attf-class="sidebar-nav-item #{state.activeTab === 'finished_goods' ? 'active' : ''}" t-on-click="() => this.switchTab('finished_goods')">
+                                <span class="nav-icon">📦</span>
+                                <span class="nav-text">Tayyor Ombor</span>
+                            </button>
+
+                            <button type="button" t-attf-class="sidebar-nav-item #{state.activeTab === 'clients' ? 'active' : ''}" t-on-click="() => this.switchTab('clients')">
+                                <span class="nav-icon">🤝</span>
+                                <span class="nav-text">Mijozlar &amp; Oldi-Berdi</span>
+                                <t t-if="state.data.clients.debtors_count > 0">
+                                    <span class="sidebar-badge badge-red">
+                                        <t t-esc="state.data.clients.debtors_count"/> nasiya
+                                    </span>
+                                </t>
+                            </button>
+
+                            <button type="button" t-attf-class="sidebar-nav-item #{state.activeTab === 'finance' ? 'active' : ''}" t-on-click="() => this.switchTab('finance')">
+                                <span class="nav-icon">💵</span>
+                                <span class="nav-text">Moliya &amp; Foyda</span>
+                                <span class="sidebar-badge badge-green">P&amp;L</span>
+                            </button>
+
+                            <button type="button" t-attf-class="sidebar-nav-item #{state.activeTab === 'history' ? 'active' : ''}" t-on-click="() => this.switchTab('history')">
+                                <span class="nav-icon">📜</span>
+                                <span class="nav-text">Seh Tarixi</span>
+                            </button>
+                        </nav>
+
+                        <div class="sidebar-footer">
+                            <div class="user-profile-badge">
+                                <div class="user-avatar">AR</div>
+                                <div class="user-details">
+                                    <div class="user-name"><t t-esc="state.data.user.name"/></div>
+                                    <div class="user-role"><t t-esc="state.data.user.role"/></div>
+                                </div>
+                            </div>
+                            <div class="server-status">
+                                <span class="status-dot"></span>
+                                <span>Odoo 19 Online</span>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- ======================================================== -->
+                    <!-- ASOSIY ISH MAYDONI                                       -->
+                    <!-- ======================================================== -->
+                    <main class="app-main">
+                        <!-- TOPBAR -->
+                        <header class="app-topbar">
+                            <div class="topbar-left">
+                                <div class="topbar-breadcrumbs">
+                                    <span class="crumb-root">Seh Boshqaruvi</span>
+                                    <span class="crumb-sep">/</span>
+                                    <span class="crumb-current">
+                                        <t t-if="state.activeTab === 'dashboard'">Umumiy Boshqaruv &amp; KPI</t>
+                                        <t t-elif="state.activeTab === 'conveyor'">Konveyer &amp; Ishlab Chiqarish BoM</t>
+                                        <t t-elif="state.activeTab === 'raw_materials'">Xomashyo Ombori va Xaridlar</t>
+                                        <t t-elif="state.activeTab === 'finished_goods'">Tayyor Mahsulotlar Ombori</t>
+                                        <t t-elif="state.activeTab === 'clients'">Mijozlar Boshqaruvi va Oldi-Berdi</t>
+                                        <t t-elif="state.activeTab === 'finance'">Moliya, Tannarx va Foyda/Zarar (P&amp;L)</t>
+                                        <t t-elif="state.activeTab === 'history'">Seh Harakatlari Tarixi va Audit Jurnali</t>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="topbar-right">
+                                <div class="badge-date">
+                                    <span>📅 <t t-esc="state.data.date_display"/></span>
+                                </div>
+                                <button type="button" class="btn-refresh" t-on-click="() => this.loadData()">
+                                    <span>🔄 Yangilash</span>
+                                </button>
+                            </div>
+                        </header>
+
+                        <!-- KONTENT BO'LIMLARI -->
+                        <div class="app-content-body">
+
+                            <!-- ================================================ -->
+                            <!-- TAB 1: BOSH QARUV (OVERVIEW)                     -->
+                            <!-- ================================================ -->
+                            <t t-if="state.activeTab === 'dashboard'">
+                                <div class="tab-pane">
+                                    <div class="section-title-row">
+                                        <div>
+                                            <h1 class="page-title">Tikuv Korxonasi Umumiy Holati</h1>
+                                            <p class="page-subtitle">Ishlab chiqarish konveyeri, ombor qoldiqlari, moliya va B2B savdolar</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- 4 Hero KPI Cards -->
+                                    <div class="hero-kpi-grid">
+                                        <div class="hero-card card-primary-blue">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Bugungi Ishlab Chiqarish</span>
+                                                <span class="hero-icon">⚡</span>
+                                            </div>
+                                            <div class="hero-value">500 <small>dona</small></div>
+                                            <div class="hero-subtext">WH/MO/00001 (Terra Pro Futbolka)</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Sifat Nazorati (OTK)</span>
+                                                <span class="hero-icon">✨</span>
+                                            </div>
+                                            <div class="hero-value text-success">98.8%</div>
+                                            <div class="hero-subtext">494 ta 1-nav mahsulot o'tdi</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Jami B2B Savdo Tushumi</span>
+                                                <span class="hero-icon">💵</span>
+                                            </div>
+                                            <div class="hero-value" style="font-size: 24px;">
+                                                <t t-esc="formatMoney(state.data.finance.revenue)"/>
+                                            </div>
+                                            <div class="hero-subtext text-success">Undirilgan: <t t-esc="formatMoney(state.data.finance.revenue - state.data.clients.total_debt)"/></div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Tayyor Zaxira Qiymati</span>
+                                                <span class="hero-icon">📦</span>
+                                            </div>
+                                            <div class="hero-value" style="font-size: 24px;">
+                                                <t t-esc="formatMoney(state.data.finished_goods.total_sale_value)"/>
+                                            </div>
+                                            <div class="hero-subtext">1,010 dona kiyim zaxirada</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Konveyer Funnel Card -->
+                                    <div class="table-card mt-4">
+                                        <div class="card-header-styled">
+                                            <h3>🔄 Sex Konveyer Bosqichlari (Jarayonda: 1 450 dona)</h3>
+                                        </div>
+                                        <div class="funnel-container">
+                                            <div class="funnel-stage">
+                                                <div class="funnel-badge badge-blue">1. Bichuv sexi</div>
+                                                <div class="funnel-qty">350 dona</div>
+                                                <div class="funnel-bar"><div class="fill" style="width: 70%;"></div></div>
+                                            </div>
+                                            <div class="funnel-stage">
+                                                <div class="funnel-badge badge-blue">2. Tikuv liniyasi</div>
+                                                <div class="funnel-qty">420 dona</div>
+                                                <div class="funnel-bar"><div class="fill" style="width: 85%;"></div></div>
+                                            </div>
+                                            <div class="funnel-stage">
+                                                <div class="funnel-badge badge-blue">3. Dazmol &amp; Tozalash</div>
+                                                <div class="funnel-qty">280 dona</div>
+                                                <div class="funnel-bar"><div class="fill" style="width: 55%;"></div></div>
+                                            </div>
+                                            <div class="funnel-stage">
+                                                <div class="funnel-badge badge-green">4. OTK Sifat nazorati</div>
+                                                <div class="funnel-qty">190 dona</div>
+                                                <div class="funnel-bar"><div class="fill bg-success" style="width: 40%;"></div></div>
+                                            </div>
+                                            <div class="funnel-stage">
+                                                <div class="funnel-badge badge-purple">5. Qadoqlash &amp; Shtrix</div>
+                                                <div class="funnel-qty">210 dona</div>
+                                                <div class="funnel-bar"><div class="fill bg-purple" style="width: 45%;"></div></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- ================================================ -->
+                            <!-- TAB 2: XOMASHYO OMBORI (RAW MATERIALS)           -->
+                            <!-- ================================================ -->
+                            <t t-if="state.activeTab === 'raw_materials'">
+                                <div class="tab-pane">
+                                    <div class="section-title-row">
+                                        <div>
+                                            <h1 class="page-title">Xomashyo Ombori va Xaridlar</h1>
+                                            <p class="page-subtitle">Keng rulon matolar, bezak furnituralari, tikuv iplari, etiketka va salafan qoldiqlari</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- 4 Hero KPI Cards (Ro'mol ERP format) -->
+                                    <div class="hero-kpi-grid">
+                                        <div class="hero-card card-primary-blue">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Rulon Matolar Zaxirasi</span>
+                                                <span class="hero-icon">🧵</span>
+                                            </div>
+                                            <div class="hero-value"><t t-esc="state.data.raw_materials.fabrics_total_display"/></div>
+                                            <div class="hero-subtext">Ombordagi barcha mato qoldiqlari</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Bezak &amp; Furnitura (Tugma, Molniya)</span>
+                                                <span class="hero-icon">✨</span>
+                                            </div>
+                                            <div class="hero-value"><t t-esc="state.data.raw_materials.hardware_total_display"/></div>
+                                            <div class="hero-subtext">Tugmalar va metall molniyalar</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Tikuv Iplari Zaxirasi</span>
+                                                <span class="hero-icon">🪡</span>
+                                            </div>
+                                            <div class="hero-value"><t t-esc="state.data.raw_materials.threads_total_display"/></div>
+                                            <div class="hero-subtext">Overlog va chok iplari</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Qadoq &amp; Brend Yorliqlari</span>
+                                                <span class="hero-icon">🏷️</span>
+                                            </div>
+                                            <div class="hero-value"><t t-esc="state.data.raw_materials.packaging_total_display"/></div>
+                                            <div class="hero-subtext">Polietilen paketlar va leybllar</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Filter Pills & Search -->
+                                    <div class="table-card mt-4">
+                                        <div class="filter-controls-row">
+                                            <div class="pills-container">
+                                                <button type="button" t-attf-class="pill-btn #{state.categoryFilter === 'all' ? 'active' : ''}" t-on-click="() => this.setCategoryFilter('all')">
+                                                    Barchasi
+                                                </button>
+                                                <button type="button" t-attf-class="pill-btn #{state.categoryFilter === 'Rulon Matolar' ? 'active' : ''}" t-on-click="() => this.setCategoryFilter('Rulon Matolar')">
+                                                    🧵 Rulon Matolar
+                                                </button>
+                                                <button type="button" t-attf-class="pill-btn #{state.categoryFilter === 'Toshlar &amp; Iplar' ? 'active' : ''}" t-on-click="() => this.setCategoryFilter('Toshlar &amp; Iplar')">
+                                                    ✨ Furnitura &amp; Iplar
+                                                </button>
+                                                <button type="button" t-attf-class="pill-btn #{state.categoryFilter === 'Qadoq &amp; Etiketka' ? 'active' : ''}" t-on-click="() => this.setCategoryFilter('Qadoq &amp; Etiketka')">
+                                                    📦 Qadoq &amp; Etiketka
+                                                </button>
+                                            </div>
+
+                                            <div class="search-box-wrapper">
+                                                <span class="search-icon">🔍</span>
+                                                <input type="text" class="search-input" placeholder="Xomashyoni qidirish... (Ctrl+K)" t-on-input="(ev) => this.onSearchInput(ev)"/>
+                                            </div>
+                                        </div>
+
+                                        <!-- Real Odoo Table -->
+                                        <div class="table-responsive">
+                                            <table class="styled-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>XOMASHYO NOMI</th>
+                                                        <th>TOIFASI</th>
+                                                        <th>OMBORDAGI ASTATKA</th>
+                                                        <th>HOLATI</th>
+                                                        <th>BIRLIK NARXI</th>
+                                                        <th>JAMI QIYMATI</th>
+                                                        <th>OXIRGI HARAKAT</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="filteredRawMaterials" t-as="item" t-key="item.id">
+                                                        <tr>
+                                                            <td class="fw-bold"><t t-esc="item.name"/></td>
+                                                            <td>
+                                                                <span class="category-tag"><t t-esc="item.category"/></span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="stock-qty-badge">
+                                                                    <t t-esc="formatNumber(item.qty)"/> <t t-esc="item.unit"/>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span t-attf-class="status-pill status-#{item.status_class}">
+                                                                    <t t-esc="item.status"/>
+                                                                </span>
+                                                            </td>
+                                                            <td class="text-muted"><t t-esc="formatMoney(item.cost_price)"/> / <t t-esc="item.unit"/></td>
+                                                            <td class="fw-bold text-dark"><t t-esc="formatMoney(item.total_cost)"/></td>
+                                                            <td class="text-muted small"><t t-esc="item.updated_at"/></td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- ================================================ -->
+                            <!-- TAB 3: TAYYOR OMBOR (FINISHED GOODS)             -->
+                            <!-- ================================================ -->
+                            <t t-if="state.activeTab === 'finished_goods'">
+                                <div class="tab-pane">
+                                    <div class="section-title-row">
+                                        <div>
+                                            <h1 class="page-title">Tayyor Mahsulotlar Ombori</h1>
+                                            <p class="page-subtitle">Sotuvga tayyor futbolkalar, ko'ylaklar, ayollar kiyimi va shimlar zaxirasi</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- 4 Hero KPI Cards -->
+                                    <div class="hero-kpi-grid">
+                                        <div class="hero-card card-primary-blue">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Jami Tayyor Mahsulot</span>
+                                                <span class="hero-icon">📦</span>
+                                            </div>
+                                            <div class="hero-value"><t t-esc="formatNumber(state.data.finished_goods.total_qty)"/> <small>dona</small></div>
+                                            <div class="hero-subtext">Barcha tayyor kiyimlar soni</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Ombor Umumiy Tannarxi</span>
+                                                <span class="hero-icon">🏭</span>
+                                            </div>
+                                            <div class="hero-value" style="font-size: 24px;"><t t-esc="formatMoney(state.data.finished_goods.total_cost)"/></div>
+                                            <div class="hero-subtext">Xomashyo va tikuv xarajatlari</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Ombor Sotuv Qiymati</span>
+                                                <span class="hero-icon">🏷️</span>
+                                            </div>
+                                            <div class="hero-value text-primary" style="font-size: 24px;"><t t-esc="formatMoney(state.data.finished_goods.total_sale_value)"/></div>
+                                            <div class="hero-subtext">Ulgurji / B2B sotuv narxida</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Kutilayotgan Sof Marja</span>
+                                                <span class="hero-icon">📈</span>
+                                            </div>
+                                            <div class="hero-value text-success" style="font-size: 24px;"><t t-esc="formatMoney(state.data.finished_goods.expected_margin)"/></div>
+                                            <div class="hero-subtext text-success">+<t t-esc="state.data.finished_goods.expected_margin_pct"/>% sof rentabellik</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Finished Goods Table -->
+                                    <div class="table-card mt-4">
+                                        <div class="filter-controls-row">
+                                            <div class="search-box-wrapper w-100">
+                                                <span class="search-icon">🔍</span>
+                                                <input type="text" class="search-input" placeholder="Tayyor mahsulotni qidirish..." t-on-input="(ev) => this.onSearchInput(ev)"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-responsive">
+                                            <table class="styled-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>MAHSULOT NOMI</th>
+                                                        <th>OMBORDAGI QOLDIQ</th>
+                                                        <th>TANNARX (BIRLIK)</th>
+                                                        <th>SOTUV NARXI (B2B)</th>
+                                                        <th>JAMI SOTUV SUMMASI</th>
+                                                        <th>RENTABELLIK</th>
+                                                        <th>HOLATI</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="filteredFinishedGoods" t-as="fg" t-key="fg.id">
+                                                        <tr>
+                                                            <td class="fw-bold"><t t-esc="fg.name"/></td>
+                                                            <td>
+                                                                <span class="stock-qty-badge">
+                                                                    <t t-esc="formatNumber(fg.qty)"/> dona
+                                                                </span>
+                                                            </td>
+                                                            <td class="text-muted"><t t-esc="formatMoney(fg.cost_price)"/></td>
+                                                            <td class="fw-bold text-primary"><t t-esc="formatMoney(fg.sale_price)"/></td>
+                                                            <td class="fw-bold text-dark"><t t-esc="formatMoney(fg.total_sale)"/></td>
+                                                            <td>
+                                                                <span class="badge-margin-tag">
+                                                                    +<t t-esc="fg.margin_pct"/>%
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span t-attf-class="status-pill status-#{fg.status_class}">
+                                                                    <t t-esc="fg.status"/>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- ================================================ -->
+                            <!-- TAB 4: MIJOZLAR & OLDI-BERDI (CLIENTS)           -->
+                            <!-- ================================================ -->
+                            <t t-if="state.activeTab === 'clients'">
+                                <div class="tab-pane">
+                                    <div class="section-title-row">
+                                        <div>
+                                            <h1 class="page-title">Mijozlar Boshqaruvi va Oldi-Berdi</h1>
+                                            <p class="page-subtitle">B2B brendlar, buyurtma hisob-kitoblari, nasiya monitoringi va Akt-Sverka</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- 4 Hero KPI Cards -->
+                                    <div class="hero-kpi-grid">
+                                        <div class="hero-card card-primary-blue">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Jami B2B Hamkorlar</span>
+                                                <span class="hero-icon">🤝</span>
+                                            </div>
+                                            <div class="hero-value"><t t-esc="state.data.clients.total_count"/> <small>korxona</small></div>
+                                            <div class="hero-subtext">Terra Pro, Novatex, Just Brands, D&amp;M</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Jami Shartnomalar</span>
+                                                <span class="hero-icon">📑</span>
+                                            </div>
+                                            <div class="hero-value" style="font-size: 24px;"><t t-esc="formatMoney(state.data.clients.total_turnover)"/></div>
+                                            <div class="hero-subtext">Barcha B2B shartnomalar summasi</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Qabul Qilingan To'lovlar</span>
+                                                <span class="hero-icon">💳</span>
+                                            </div>
+                                            <div class="hero-value text-success" style="font-size: 24px;"><t t-esc="formatMoney(state.data.clients.total_collected)"/></div>
+                                            <div class="hero-subtext text-success">Kassa va bankka kirim bo'ldi</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Joriy Nasiya (Debitorlik)</span>
+                                                <span class="hero-icon">⏳</span>
+                                            </div>
+                                            <div class="hero-value text-danger" style="font-size: 24px;"><t t-esc="formatMoney(state.data.clients.total_debt)"/></div>
+                                            <div class="hero-subtext text-danger"><t t-esc="state.data.clients.debtors_count"/> ta mijozda nasiya bor</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Clients Table -->
+                                    <div class="table-card mt-4">
+                                        <div class="filter-controls-row">
+                                            <div class="search-box-wrapper w-100">
+                                                <span class="search-icon">🔍</span>
+                                                <input type="text" class="search-input" placeholder="Mijoz nomi yoki telefon raqami bo'yicha qidirish..." t-on-input="(ev) => this.onSearchInput(ev)"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-responsive">
+                                            <table class="styled-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>MIJOZ (B2B BRAND)</th>
+                                                        <th>TELEFON</th>
+                                                        <th>BUYURTMALAR</th>
+                                                        <th>JAMI SAVDO</th>
+                                                        <th>TO'LANGAN</th>
+                                                        <th>NASIYA QARZ</th>
+                                                        <th>HOLATI</th>
+                                                        <th>SOLISHTIRMA (AKT)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="filteredClients" t-as="cl" t-key="cl.id">
+                                                        <tr>
+                                                            <td class="fw-bold"><t t-esc="cl.name"/></td>
+                                                            <td class="text-muted"><t t-esc="cl.phone"/></td>
+                                                            <td><t t-esc="cl.orders_count"/> ta buyurtma</td>
+                                                            <td class="fw-bold"><t t-esc="formatMoney(cl.total_sales)"/></td>
+                                                            <td class="text-success fw-bold"><t t-esc="formatMoney(cl.paid_amount)"/></td>
+                                                            <td>
+                                                                <t t-if="cl.debt_amount > 0">
+                                                                    <span class="badge-debt"><t t-esc="formatMoney(cl.debt_amount)"/></span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span class="text-muted">0 so'm</span>
+                                                                </t>
+                                                            </td>
+                                                            <td>
+                                                                <span t-attf-class="status-pill status-#{cl.status_class}">
+                                                                    <t t-esc="cl.status"/>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <button type="button" class="btn-akt-sverka" t-on-click="() => this.openClientStatement(cl)">
+                                                                    <span>📑 Akt-Sverka</span>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- ================================================ -->
+                            <!-- TAB 5: MOLIYA & P&L TAHLILI (FINANCE)            -->
+                            <!-- ================================================ -->
+                            <t t-if="state.activeTab === 'finance'">
+                                <div class="tab-pane">
+                                    <div class="section-title-row">
+                                        <div>
+                                            <h1 class="page-title">Moliya, Tannarx va Foyda/Zarar (P&amp;L)</h1>
+                                            <p class="page-subtitle">Sex moliyaviy oqimi, xomashyo sarfi, ishchilar maoshi, sof foyda va likvidlik</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- 4 Hero KPI Cards -->
+                                    <div class="hero-kpi-grid">
+                                        <div class="hero-card card-primary-blue">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Jami Realizatsiya (Tushum)</span>
+                                                <span class="hero-icon">💰</span>
+                                            </div>
+                                            <div class="hero-value" style="font-size: 24px;"><t t-esc="formatMoney(state.data.finance.revenue)"/></div>
+                                            <div class="hero-subtext">Barcha B2B kiyim sotuvlari</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Xomashyo Sarfi (COGS)</span>
+                                                <span class="hero-icon">🧵</span>
+                                            </div>
+                                            <div class="hero-value text-danger" style="font-size: 24px;"><t t-esc="formatMoney(state.data.finance.cogs)"/></div>
+                                            <div class="hero-subtext">Matolar, iplar va aksessuarlar</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Ishchilar Ish Haqi (Wages)</span>
+                                                <span class="hero-icon">👥</span>
+                                            </div>
+                                            <div class="hero-value text-danger" style="font-size: 24px;"><t t-esc="formatMoney(state.data.finance.wages)"/></div>
+                                            <div class="hero-subtext">Tikuvchi va bichuvchilar ishbay maoshi</div>
+                                        </div>
+
+                                        <div class="hero-card">
+                                            <div class="hero-card-header">
+                                                <span class="hero-label">Sof Foyda (Net Profit)</span>
+                                                <span class="hero-icon">📈</span>
+                                            </div>
+                                            <div class="hero-value text-success" style="font-size: 24px;"><t t-esc="formatMoney(state.data.finance.net_profit)"/></div>
+                                            <div class="hero-subtext text-success">+<t t-esc="state.data.finance.net_margin_pct"/>% rentabellik</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Liquidity & Cash Cards Row -->
+                                    <div class="row g-4 mt-3">
+                                        <div class="col-md-6">
+                                            <div class="bank-card">
+                                                <div class="bank-header">
+                                                    <div>
+                                                        <div class="bank-title">🏛️ Asosiy Bank Hisob Raqami (BNK1)</div>
+                                                        <div class="bank-sub">Milliy Bank / O'zbekiston So'mi</div>
+                                                    </div>
+                                                    <span class="badge-bank-active">Faol</span>
+                                                </div>
+                                                <div class="bank-amount"><t t-esc="formatMoney(state.data.finance.bank_balance)"/></div>
+                                                <div class="bank-note">INV/2026/00001 to'lovi qabul qilingan</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="bank-card card-cash">
+                                                <div class="bank-header">
+                                                    <div>
+                                                        <div class="bank-title">💵 Sex Asosiy Kassasi (Naqd Pul)</div>
+                                                        <div class="bank-sub">Tezkor mayda xaridlar va ishbay avanslar uchun</div>
+                                                    </div>
+                                                    <span class="badge-bank-active">Faol</span>
+                                                </div>
+                                                <div class="bank-amount"><t t-esc="formatMoney(state.data.finance.cash_balance)"/></div>
+                                                <div class="bank-note">Sex seyfida mavjud naqd qoldiq</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- P&L Breakdown Table -->
+                                    <div class="table-card mt-4">
+                                        <div class="card-header-styled">
+                                            <h3>📊 Moliyaviy Natijalar To'liq Tahlili (P&amp;L)</h3>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="styled-table pnl-table">
+                                                <tbody>
+                                                    <tr class="table-success-row">
+                                                        <td class="fw-bold">1. Jami Savdo Tushumi (Daromad)</td>
+                                                        <td class="text-end fw-bold text-success"><t t-esc="formatMoney(state.data.finance.revenue)"/></td>
+                                                        <td class="text-end text-muted">100.0%</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="ps-4">➖ Xomashyo va mato tannarxi (COGS)</td>
+                                                        <td class="text-end text-danger">-<t t-esc="formatMoney(state.data.finance.cogs)"/></td>
+                                                        <td class="text-end text-muted">45.6%</td>
+                                                    </tr>
+                                                    <tr class="fw-bold">
+                                                        <td>2. Yalpi Foyda (Gross Profit)</td>
+                                                        <td class="text-end fw-bold text-dark"><t t-esc="formatMoney(state.data.finance.gross_profit)"/></td>
+                                                        <td class="text-end fw-bold text-dark"><t t-esc="state.data.finance.gross_margin_pct"/>%</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="ps-4">➖ Ishchilar oylik va ishbay maoshi</td>
+                                                        <td class="text-end text-danger">-<t t-esc="formatMoney(state.data.finance.wages)"/></td>
+                                                        <td class="text-end text-muted">5.7%</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="ps-4">➖ Sex kommunal, elektr va ijara xarajatlari</td>
+                                                        <td class="text-end text-danger">-<t t-esc="formatMoney(state.data.finance.overhead)"/></td>
+                                                        <td class="text-end text-muted">3.5%</td>
+                                                    </tr>
+                                                    <tr class="table-net-profit-row">
+                                                        <td class="fw-bold text-success">3. SOF FOYDA (NET PROFIT)</td>
+                                                        <td class="text-end fw-bold text-success" style="font-size: 20px;"><t t-esc="formatMoney(state.data.finance.net_profit)"/></td>
+                                                        <td class="text-end fw-bold text-success" style="font-size: 18px;"><t t-esc="state.data.finance.net_margin_pct"/>%</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- ================================================ -->
+                            <!-- TAB 6: SEH TARIXI & AUDIT (HISTORY)              -->
+                            <!-- ================================================ -->
+                            <t t-if="state.activeTab === 'history'">
+                                <div class="tab-pane">
+                                    <div class="section-title-row">
+                                        <div>
+                                            <h1 class="page-title">Seh Harakatlari Tarixi va Audit Jurnali</h1>
+                                            <p class="page-subtitle">Xomashyo kirimi, ishlab chiqarish, OTK nazorati, sotuv jo'natmalari va to'lovlar jurnali</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-card">
+                                        <div class="filter-controls-row">
+                                            <div class="search-box-wrapper w-100">
+                                                <span class="search-icon">🔍</span>
+                                                <input type="text" class="search-input" placeholder="Hujjat raqami, mijoz yoki amal turi bo'yicha qidirish..." t-on-input="(ev) => this.onSearchInput(ev)"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-responsive">
+                                            <table class="styled-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>SANA VA VAQT</th>
+                                                        <th>HUJJAT RAQAMI</th>
+                                                        <th>HARAKAT TURI</th>
+                                                        <th>HAMKOR / ISHCHI</th>
+                                                        <th>BATAFSIL MA'LUMOT</th>
+                                                        <th>SUMMA</th>
+                                                        <th>MAS'UL XODIM</th>
+                                                        <th>HOLATI</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="filteredHistory" t-as="hist" t-key="hist.id">
+                                                        <tr>
+                                                            <td class="text-muted small"><t t-esc="hist.date"/></td>
+                                                            <td class="fw-bold"><t t-esc="hist.doc_name"/></td>
+                                                            <td>
+                                                                <span t-attf-class="sidebar-badge #{hist.type_class}">
+                                                                    <t t-esc="hist.type"/>
+                                                                </span>
+                                                            </td>
+                                                            <td><t t-esc="hist.partner"/></td>
+                                                            <td><t t-esc="hist.details"/></td>
+                                                            <td class="fw-bold text-dark">
+                                                                <t t-if="hist.amount > 0">
+                                                                    <t t-esc="formatMoney(hist.amount)"/>
+                                                                </t>
+                                                                <t t-else="">-</t>
+                                                            </td>
+                                                            <td class="text-muted small"><t t-esc="hist.user"/></td>
+                                                            <td>
+                                                                <span class="status-pill status-success"><t t-esc="hist.status"/></span>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- ================================================ -->
+                            <!-- TAB 7: KONVEYER & BOM                            -->
+                            <!-- ================================================ -->
+                            <t t-if="state.activeTab === 'conveyor'">
+                                <div class="tab-pane">
+                                    <div class="section-title-row">
+                                        <div>
+                                            <h1 class="page-title">Konveyer &amp; Ishlab Chiqarish BoM</h1>
+                                            <p class="page-subtitle">Faol buyurtmalar, modellar bo'yicha materiallar sarfi va tikuv liniyalari holati</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-card">
+                                        <div class="card-header-styled">
+                                            <h3>🏭 Faol Ishlab Chiqarish Buyurtmalari (MO)</h3>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="styled-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>BUYURTMA RAQAMI</th>
+                                                        <th>MAHSULOT NOMI</th>
+                                                        <th>MIQDORI</th>
+                                                        <th>JORIY BOSQICH</th>
+                                                        <th>BAJARILISH FOIZI</th>
+                                                        <th>HOLATI</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="state.data.conveyor.active_mos" t-as="mo" t-key="mo.name">
+                                                        <tr>
+                                                            <td class="fw-bold"><t t-esc="mo.name"/></td>
+                                                            <td><t t-esc="mo.product"/></td>
+                                                            <td class="fw-bold"><t t-esc="mo.qty"/> dona</td>
+                                                            <td>
+                                                                <span class="category-tag"><t t-esc="mo.stage"/></span>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <div class="progress flex-grow-1" style="height: 8px;">
+                                                                        <div class="progress-bar bg-primary" t-attf-style="width: #{mo.progress}%;"></div>
+                                                                    </div>
+                                                                    <span class="small fw-bold"><t t-esc="mo.progress"/>%</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <span class="status-pill status-success"><t t-esc="mo.status"/></span>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+                        </div>
+                    </main>
+
+                    <!-- ======================================================== -->
+                    <!-- MODAL: AKT-SVERKA (SOLISHTIRMA DALOLATNOMA)             -->
+                    <!-- ======================================================== -->
+                    <t t-if="state.activeModal === 'statement' and state.selectedClient">
+                        <div class="modal-overlay" t-on-click.self="() => this.closeModal()">
+                            <div class="modal-box modal-box-lg">
+                                <div class="modal-header">
+                                    <div class="modal-title">📑 O'zaro Hisob-Kitob Solishtirma Dalolatnomasi (Akt-Sverka)</div>
+                                    <button type="button" class="btn-close-modal" t-on-click="() => this.closeModal()">&amp;times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="statement-info-box">
+                                        <div class="row g-3">
+                                            <div class="col-6">
+                                                <div><strong>Korxona:</strong> Nova Tekstil Ishlab Chiqarish MChJ</div>
+                                                <div><strong>Mijoz (Hamkor):</strong> <t t-esc="state.selectedClient.name"/></div>
+                                                <div><strong>Telefon:</strong> <t t-esc="state.selectedClient.phone"/></div>
+                                            </div>
+                                            <div class="col-6 text-end">
+                                                <div><strong>Dalolatnoma Sanasi:</strong> <t t-esc="state.data.date_display"/></div>
+                                                <div><strong>Valyuta:</strong> O'zbekiston So'mi (UZS)</div>
+                                                <div><strong>Joriy Nasiya Qoldig'i:</strong> <span class="text-danger fw-bold"><t t-esc="formatMoney(state.selectedClient.debt_amount)"/></span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <table class="styled-table mt-3">
+                                        <thead>
+                                            <tr>
+                                                <th>SANA</th>
+                                                <th>HUJJAT RAQAMI</th>
+                                                <th>MAZMUNI / IZOH</th>
+                                                <th class="text-end">DEBET (SAVDO)</th>
+                                                <th class="text-end">KREDIT (TO'LOV)</th>
+                                                <th class="text-end">QOLDIQ BALANS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.selectedClient.statement" t-as="st" t-key="st.doc">
+                                                <tr>
+                                                    <td><t t-esc="st.date"/></td>
+                                                    <td class="fw-bold"><t t-esc="st.doc"/></td>
+                                                    <td><t t-esc="st.desc"/></td>
+                                                    <td class="text-end fw-bold text-dark"><t t-esc="formatMoney(st.debit)"/></td>
+                                                    <td class="text-end fw-bold text-success"><t t-esc="formatMoney(st.credit)"/></td>
+                                                    <td class="text-end fw-bold text-primary"><t t-esc="formatMoney(st.balance)"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="pill-btn" t-on-click="() => this.printStatement()">
+                                        <span>🖨️ Chop Etish</span>
+                                    </button>
+                                    <button type="button" class="pill-btn active" t-on-click="() => this.closeModal()">
+                                        Yopish
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

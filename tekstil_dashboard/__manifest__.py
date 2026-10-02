@@ -7,13 +7,15 @@
     "author": "Expcod",
     "website": "https://demo.novaodoo.uz",
     "license": "LGPL-3",
-    "depends": ["web", "base"],
+    "depends": ["web", "base", "stock", "account", "mrp", "sale"],
     "data": [
         "views/menus.xml",
     ],
     "assets": {
         "web.assets_backend": [
-            "tekstil_dashboard/static/src/app/dashboard_action.js",
+            "tekstil_dashboard/static/src/dashboard/dashboard.scss",
+            "tekstil_dashboard/static/src/dashboard/dashboard.xml",
+            "tekstil_dashboard/static/src/dashboard/dashboard.js",
         ],
     },
     "installable": True,

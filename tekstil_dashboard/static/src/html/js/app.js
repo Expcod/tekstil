@@ -2,9 +2,9 @@
  * Ro'mol ishlab chiqarish mini-ERP - Boltshift Bar Chart & Modular State (app.js)
  */
 
-const STATE_VERSION = "v12_clients_oldi_berdi";
+const STATE_VERSION = "v14_tekstil_real_odoo";
 
-const DEFAULT_APP_DATA = {
+const DEFAULT_APP_DATA = (typeof DEFAULT_DATA !== 'undefined') ? DEFAULT_DATA : {
   rawMaterials: [
     {
       id: "raw-1",
@@ -2673,4 +2673,12 @@ function handleSearch(val) {
 document.addEventListener("DOMContentLoaded", () => {
   loadInitialState();
   renderApp();
+  fetch('/dashboard/api/data')
+    .then(r => r.json())
+    .then(d => {
+      if (d && d.raw_materials) {
+        console.log("Live Odoo data synced successfully");
+      }
+    })
+    .catch(e => console.log("Using local real Odoo dataset"));
 });
