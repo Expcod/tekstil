@@ -7,7 +7,7 @@ export class RomolDashboardAction extends Component {
     static template = xml`
         <div class="o_action_romol_dashboard" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; background: #f4f5f8;">
             <iframe 
-                src="/tekstil_dashboard/app" 
+                src="/tekstil_dashboard/static/src/html/index.html" 
                 style="width: 100%; height: 100%; border: none; display: block;" 
                 title="Ro'mol ERP Dashboard"
             />
