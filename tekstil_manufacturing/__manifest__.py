@@ -31,13 +31,13 @@ Tekstil va Tikuv Korxonalari Boshqaruvi
         "security/security.xml",
         "security/ir.model.access.csv",
         "data/initial_data.xml",
-        "views/menus.xml",
         "views/plan_views.xml",
         "views/batch_views.xml",
         "views/quality_views.xml",
         "views/worker_output_views.xml",
         "views/brand_order_views.xml",
         "views/subcontract_views.xml",
+        "views/menus.xml",
     ],
     "assets": {
         "web.assets_backend": [
