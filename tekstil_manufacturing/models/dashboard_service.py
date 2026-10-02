@@ -10,7 +10,7 @@ class TekstilDashboardService(models.AbstractModel):
     @api.model
     def get_dashboard_data(self):
         """Barcha dashboard va planshet ma'lumotlarini 1 ta tezkor RPC da qaytaradi"""
-        today = fields.Date.contextToday(self)
+        today = fields.Date.context_today(self)
         
         # 1. Umumiy KPI ko'rsatkichlar
         today_outputs = self.env["tekstil.worker.output"].search([("date", "=", today)])

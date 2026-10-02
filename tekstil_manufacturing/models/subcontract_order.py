@@ -67,7 +67,7 @@ class TekstilSubcontractOrder(models.Model):
     )
     date_sent = fields.Date(
         string="Yuborilgan Sana",
-        default=fields.Date.contextToday,
+        default=fields.Date.context_today,
         required=True,
     )
     date_expected = fields.Date(
@@ -111,7 +111,7 @@ class TekstilSubcontractOrder(models.Model):
     def action_receive(self):
         for rec in self:
             rec.state = "received"
-            rec.date_received = fields.Date.contextToday(rec)
+            rec.date_received = fields.Date.context_today(rec)
             if not rec.received_qty:
                 rec.received_qty = rec.sent_qty
             # Partiyani dazmol bosqichiga o'tkazish

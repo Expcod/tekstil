@@ -31,7 +31,7 @@ class TekstilProductionPlan(models.Model):
     date_start = fields.Date(
         string="Boshlanish Sanasi",
         required=True,
-        default=fields.Date.contextToday,
+        default=fields.Date.context_today,
         tracking=True,
     )
     date_end = fields.Date(
@@ -106,7 +106,7 @@ class TekstilProductionPlan(models.Model):
     @api.model
     def get_dashboard_summary(self):
         """Dashboard uchun umumiy tezkor ko'rsatkichlar"""
-        today = fields.Date.contextToday(self)
+        today = fields.Date.context_today(self)
         
         # Bugungi xodimlar unumi
         outputs = self.env["tekstil.worker.output"].search([("date", "=", today)])

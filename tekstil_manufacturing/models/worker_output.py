@@ -61,7 +61,7 @@ class TekstilWorkerOutput(models.Model):
     )
     date = fields.Date(
         string="Sana",
-        default=fields.Date.contextToday,
+        default=fields.Date.context_today,
         required=True,
         index=True,
     )
@@ -91,7 +91,7 @@ class TekstilWorkerOutput(models.Model):
             "operation_name": operation_name,
             "quantity": quantity,
             "piece_rate": piece_rate,
-            "date": fields.Date.contextToday(self),
+            "date": fields.Date.context_today(self),
             "datetime": fields.Datetime.now(),
         })
 

@@ -60,7 +60,7 @@ class TekstilQualityCheck(models.Model):
     )
     check_date = fields.Date(
         string="Tekshiruv Sanasi",
-        default=fields.Date.contextToday,
+        default=fields.Date.context_today,
         required=True,
         tracking=True,
     )
