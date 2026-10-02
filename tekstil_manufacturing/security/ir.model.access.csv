@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tekstil_plan_user,tekstil.production.plan.user,model_tekstil_production_plan,group_tekstil_user,1,1,1,0
+access_tekstil_plan_manager,tekstil.production.plan.manager,model_tekstil_production_plan,group_tekstil_manager,1,1,1,1
+access_tekstil_plan_line_user,tekstil.plan.line.user,model_tekstil_plan_line,group_tekstil_user,1,1,1,0
+access_tekstil_plan_line_manager,tekstil.plan.line.manager,model_tekstil_plan_line,group_tekstil_manager,1,1,1,1
+access_tekstil_batch_user,tekstil.production.batch.user,model_tekstil_production_batch,group_tekstil_user,1,1,1,0
+access_tekstil_batch_manager,tekstil.production.batch.manager,model_tekstil_production_batch,group_tekstil_manager,1,1,1,1
+access_tekstil_worker_output_user,tekstil.worker.output.user,model_tekstil_worker_output,group_tekstil_user,1,1,1,0
+access_tekstil_worker_output_manager,tekstil.worker.output.manager,model_tekstil_worker_output,group_tekstil_manager,1,1,1,1
+access_tekstil_defect_type_user,tekstil.defect.type.user,model_tekstil_defect_type,group_tekstil_user,1,0,0,0
+access_tekstil_defect_type_manager,tekstil.defect.type.manager,model_tekstil_defect_type,group_tekstil_manager,1,1,1,1
+access_tekstil_quality_check_user,tekstil.quality.check.user,model_tekstil_quality_check,group_tekstil_user,1,1,1,0
+access_tekstil_quality_check_manager,tekstil.quality.check.manager,model_tekstil_quality_check,group_tekstil_manager,1,1,1,1
+access_tekstil_brand_order_user,tekstil.brand.order.user,model_tekstil_brand_order,group_tekstil_user,1,1,1,0
+access_tekstil_brand_order_manager,tekstil.brand.order.manager,model_tekstil_brand_order,group_tekstil_manager,1,1,1,1
+access_tekstil_subcontract_user,tekstil.subcontract.order.user,model_tekstil_subcontract_order,group_tekstil_user,1,1,1,0
+access_tekstil_subcontract_manager,tekstil.subcontract.order.manager,model_tekstil_subcontract_order,group_tekstil_manager,1,1,1,1

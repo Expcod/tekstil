@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Plan List View -->
+    <record id="view_tekstil_plan_tree" model="ir.ui.view">
+        <field name="name">tekstil.production.plan.tree</field>
+        <field name="model">tekstil.production.plan</field>
+        <field name="arch" type="xml">
+            <list string="Ishlab Chiqarish Rejalari" decoration-info="state == 'draft'" decoration-warning="state == 'in_progress'" decoration-success="state == 'done'">
+                <field name="name"/>
+                <field name="plan_type"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="target_qty" sum="Jami Reja"/>
+                <field name="produced_qty" sum="Jami Bajarildi"/>
+                <field name="completion_rate" widget="progressbar"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state in ('confirmed', 'in_progress')" decoration-success="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Plan Form View -->
+    <record id="view_tekstil_plan_form" model="ir.ui.view">
+        <field name="name">tekstil.production.plan.form</field>
+        <field name="model">tekstil.production.plan</field>
+        <field name="arch" type="xml">
+            <form string="Ishlab Chiqarish Rejasi">
+                <header>
+                    <button name="action_confirm" type="object" string="Tasdiqlash" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_start" type="object" string="Ishga Tushirish" class="oe_highlight" invisible="state != 'confirmed'"/>
+                    <button name="action_done" type="object" string="Yakunlash" class="oe_highlight" invisible="state != 'in_progress'"/>
+                    <button name="action_cancel" type="object" string="Bekor Qilish" invisible="state in ('done', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Reja Nomi"/>
+                        <h1>
+                            <field name="name" placeholder="Masalan: 2026-H40: Futbolka va Ko'ylaklar haftalik rejasi"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="plan_type"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                        <group>
+                            <field name="target_qty"/>
+                            <field name="produced_qty"/>
+                            <field name="completion_rate" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Reja Qatorlari (Kiyimlar &amp; O'lchamlar)" name="lines">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="line_code"/>
+                                    <field name="product_id"/>
+                                    <field name="color"/>
+                                    <field name="qty_xs"/>
+                                    <field name="qty_s"/>
+                                    <field name="qty_m"/>
+                                    <field name="qty_l"/>
+                                    <field name="qty_xl"/>
+                                    <field name="qty_2xl"/>
+                                    <field name="planned_qty" sum="Jami Reja"/>
+                                    <field name="produced_qty" sum="Jami Fakt"/>
+                                    <field name="completion_rate" widget="progressbar"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Bog'langan Partiyalar (Kroy)" name="batches">
+                            <field name="batch_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="stage"/>
+                                    <field name="qc_passed_qty"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Eslatma" name="notes">
+                            <field name="note" placeholder="Reja bo'yicha qo'shimcha ko'rsatmalar..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Plan Action -->
+    <record id="action_tekstil_plans" model="ir.actions.act_window">
+        <field name="name">Ishlab Chiqarish Rejalari</field>
+        <field name="res_model">tekstil.production.plan</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Yangi haftalik yoki oylik reja yarating!
+            </p>
+        </field>
+    </record>
+</odoo>

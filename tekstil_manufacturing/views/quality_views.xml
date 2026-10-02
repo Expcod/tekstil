@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Quality Check List View -->
+    <record id="view_tekstil_qc_tree" model="ir.ui.view">
+        <field name="name">tekstil.quality.check.tree</field>
+        <field name="model">tekstil.quality.check</field>
+        <field name="arch" type="xml">
+            <list string="OTK Sifat Tekshiruvlari" decoration-success="state == 'passed'" decoration-warning="state == 'rework'" decoration-danger="state == 'rejected'">
+                <field name="name"/>
+                <field name="batch_id"/>
+                <field name="product_id"/>
+                <field name="inspector_id"/>
+                <field name="check_date"/>
+                <field name="inspected_qty" sum="Jami Tekshirildi"/>
+                <field name="grade_1_qty" sum="1-Nav Jami"/>
+                <field name="grade_2_qty" sum="2-Nav Jami"/>
+                <field name="rework_qty" sum="Tuzatish Jami"/>
+                <field name="reject_qty" sum="Brak Jami"/>
+                <field name="pass_rate" widget="progressbar"/>
+                <field name="state" widget="badge" decoration-success="state == 'passed'" decoration-warning="state == 'rework'" decoration-danger="state == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Quality Check Form View -->
+    <record id="view_tekstil_qc_form" model="ir.ui.view">
+        <field name="name">tekstil.quality.check.form</field>
+        <field name="model">tekstil.quality.check</field>
+        <field name="arch" type="xml">
+            <form string="OTK Sifat Tekshiruvi">
+                <header>
+                    <button name="action_pass" type="object" string="1-Nav Qabul Qilish" class="oe_highlight btn-success" invisible="state in ('passed', 'rejected')"/>
+                    <button name="action_rework" type="object" string="Tuzatishga Qaytarish" class="btn-warning" invisible="state in ('passed', 'rejected')"/>
+                    <button name="action_reject" type="object" string="Brak Qilish" class="btn-danger" invisible="state in ('passed', 'rejected')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,passed,rework,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Tekshiruv Raqami"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Partiya va Mas'ul">
+                            <field name="batch_id"/>
+                            <field name="product_id"/>
+                            <field name="inspector_id"/>
+                            <field name="check_date"/>
+                        </group>
+                        <group string="Sifat Baholash Ko'rsatkichlari">
+                            <field name="inspected_qty"/>
+                            <field name="grade_1_qty"/>
+                            <field name="grade_2_qty"/>
+                            <field name="rework_qty"/>
+                            <field name="reject_qty"/>
+                            <field name="pass_rate" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <group string="Aniqlangan Kamchiliklar va Nuqsonlar">
+                        <field name="defect_type_ids" widget="many2many_tags" placeholder="Nuqson turlarini tanlang..."/>
+                        <field name="defect_note" placeholder="Batafsil OTK xulosasi, kamchilik sabablari..."/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Quality Check Action -->
+    <record id="action_tekstil_qc_checks" model="ir.actions.act_window">
+        <field name="name">OTK Sifat Qabullari</field>
+        <field name="res_model">tekstil.quality.check</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Defect Types Views -->
+    <record id="view_tekstil_defect_tree" model="ir.ui.view">
+        <field name="name">tekstil.defect.type.tree</field>
+        <field name="model">tekstil.defect.type</field>
+        <field name="arch" type="xml">
+            <list string="Nuqson Turlari" editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="description"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_tekstil_defect_types" model="ir.actions.act_window">
+        <field name="name">Nuqson Turlari</field>
+        <field name="res_model">tekstil.defect.type</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>

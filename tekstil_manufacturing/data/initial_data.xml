@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequences -->
+        <record id="seq_tekstil_batch" model="ir.sequence">
+            <field name="name">Tekstil Partiya</field>
+            <field name="code">tekstil.batch</field>
+            <field name="prefix">PRT-%(year)s-</field>
+            <field name="padding">4</field>
+        </record>
+
+        <record id="seq_tekstil_qc" model="ir.sequence">
+            <field name="name">Tekstil OTK Nazorati</field>
+            <field name="code">tekstil.quality.check</field>
+            <field name="prefix">OTK-%(year)s-</field>
+            <field name="padding">4</field>
+        </record>
+
+        <record id="seq_tekstil_brand_order" model="ir.sequence">
+            <field name="name">Brand Buyurtmasi</field>
+            <field name="code">tekstil.brand.order</field>
+            <field name="prefix">B2B-%(year)s-</field>
+            <field name="padding">4</field>
+        </record>
+
+        <record id="seq_tekstil_subcontract" model="ir.sequence">
+            <field name="name">Sub-pudrat Buyurtmasi</field>
+            <field name="code">tekstil.subcontract.order</field>
+            <field name="prefix">SUB-%(year)s-</field>
+            <field name="padding">4</field>
+        </record>
+
+        <!-- Nuqson turlari (OTK Klassifikatori) -->
+        <record id="defect_sewing_stitch" model="tekstil.defect.type">
+            <field name="name">Chok qiyshiqligi yoki ip uzilishi</field>
+            <field name="code">DEF-CHK-01</field>
+            <field name="category">sewing</field>
+            <field name="description">Overlog yoki to'g'ri chok chizig'ining buzilishi</field>
+        </record>
+
+        <record id="defect_sewing_collar" model="tekstil.defect.type">
+            <field name="name">Yoqa va manjet simmetriyasi buzilishi</field>
+            <field name="code">DEF-YQ-02</field>
+            <field name="category">sewing</field>
+            <field name="description">Futbolka yoki ko'ylak yoqasining o'ng va chap tomoni nomutanosibligi</field>
+        </record>
+
+        <record id="defect_fabric_hole" model="tekstil.defect.type">
+            <field name="name">Mato teshigi / Ip tortilishi</field>
+            <field name="code">DEF-MT-03</field>
+            <field name="category">fabric</field>
+            <field name="description">To'quv yoki bo'yashdagi xomashyo teshigi va nuqsoni</field>
+        </record>
+
+        <record id="defect_fabric_shade" model="tekstil.defect.type">
+            <field name="name">Rang tafovuti (Ton farqi)</field>
+            <field name="code">DEF-RNG-04</field>
+            <field name="category">fabric</field>
+            <field name="description">Oldi va orqa detallar rangining bir-biriga mos kelmasligi</field>
+        </record>
+
+        <record id="defect_stain_oil" model="tekstil.defect.type">
+            <field name="name">Moy / Yog' yoki texnik ifloslanish</field>
+            <field name="code">DEF-DOG-05</field>
+            <field name="category">stain</field>
+            <field name="description">Stanok moyi yoki qo'l izlari tushishi</field>
+        </record>
+
+        <record id="defect_dimension_size" model="tekstil.defect.type">
+            <field name="name">O'lcham nomutanosibligi (+/- 2sm)</field>
+            <field name="code">DEF-OLCH-06</field>
+            <field name="category">dimension</field>
+            <field name="description">Lekalo standartiga mos kelmaslik, tor yoki uzun chiqishi</field>
+        </record>
+
+        <record id="defect_trim_button" model="tekstil.defect.type">
+            <field name="name">Tugma yoki furnitura xatosi</field>
+            <field name="code">DEF-FRN-07</field>
+            <field name="category">trim</field>
+            <field name="description">Tugma bo'shligi, molniya qotishi, yorliq noto'g'ri qadalishi</field>
+        </record>
+    </data>
+</odoo>

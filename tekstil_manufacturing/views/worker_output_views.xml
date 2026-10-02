@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Worker Output List View -->
+    <record id="view_tekstil_worker_output_tree" model="ir.ui.view">
+        <field name="name">tekstil.worker.output.tree</field>
+        <field name="model">tekstil.worker.output</field>
+        <field name="arch" type="xml">
+            <list string="Xodimlar Ishlab Chiqargan Mahsulotlar">
+                <field name="datetime"/>
+                <field name="employee_id"/>
+                <field name="department" widget="badge"/>
+                <field name="batch_id"/>
+                <field name="product_id"/>
+                <field name="operation_name"/>
+                <field name="quantity" sum="Jami Dona"/>
+                <field name="piece_rate"/>
+                <field name="total_wage" sum="Jami Ishbay Haq"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Worker Output Pivot View (Xodimlar Bo'yicha Tahlil) -->
+    <record id="view_tekstil_worker_output_pivot" model="ir.ui.view">
+        <field name="name">tekstil.worker.output.pivot</field>
+        <field name="model">tekstil.worker.output</field>
+        <field name="arch" type="xml">
+            <pivot string="Xodimlar Unumdorligi Tahlili">
+                <field name="employee_id" type="row"/>
+                <field name="operation_name" type="col"/>
+                <field name="quantity" type="measure"/>
+                <field name="total_wage" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Worker Output Action -->
+    <record id="action_tekstil_worker_outputs" model="ir.actions.act_window">
+        <field name="name">Xodimlar Unumi (Ishbay Haq)</field>
+        <field name="res_model">tekstil.worker.output</field>
+        <field name="view_mode">list,pivot</field>
+    </record>
+</odoo>

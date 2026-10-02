@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="tekstil_manufacturing.Dashboard">
+        <div class="o_tekstil_dashboard">
+            <!-- -------------------------------------------------------- -->
+            <!-- CHAP SIDEBAR (ASOSIY NAVIGATSIYA)                       -->
+            <!-- -------------------------------------------------------- -->
+            <aside class="tekstil-sidebar">
+                <div class="sidebar-brand">
+                    <div class="brand-badge">
+                        <i class="fa fa-cut"/>
+                    </div>
+                    <div class="brand-text">
+                        <h4>Tekstil ERP</h4>
+                        <span>Ishlab Chiqarish &amp; OTK</span>
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-section-title">ASOSIY MONITORING</div>
+                    
+                    <button class="sidebar-nav-btn" t-att-class="{ 'active': state.activeTab === 'overview' }" t-on-click="() => this.switchTab('overview')">
+                        <i class="fa fa-dashboard"/>
+                        <span>Umumiy Boshqaruv</span>
+                    </button>
+
+                    <button class="sidebar-nav-btn" t-att-class="{ 'active': state.activeTab === 'conveyor' }" t-on-click="() => this.switchTab('conveyor')">
+                        <i class="fa fa-refresh"/>
+                        <span>Konveyer &amp; Partiyalar</span>
+                        <span class="badge-pill" t-esc="state.data.batches.length || 0"/>
+                    </button>
+
+                    <button class="sidebar-nav-btn" t-att-class="{ 'active': state.activeTab === 'planning' }" t-on-click="() => this.switchTab('planning')">
+                        <i class="fa fa-calendar-check-o"/>
+                        <span>Rejalashtirish</span>
+                        <span class="badge-pill" t-esc="state.data.plans.length || 0"/>
+                    </button>
+
+                    <div class="nav-section-title">SEX VA PLANSHET</div>
+
+                    <button class="sidebar-nav-btn" t-att-class="{ 'active': state.activeTab === 'tablet' }" t-on-click="() => this.switchTab('tablet')">
+                        <i class="fa fa-tablet text-primary"/>
+                        <span class="fw-bold text-primary">Bo'lim Plansheti (Kiosk)</span>
+                    </button>
+
+                    <button class="sidebar-nav-btn" t-att-class="{ 'active': state.activeTab === 'quality' }" t-on-click="() => this.switchTab('quality')">
+                        <i class="fa fa-check-square-o text-success"/>
+                        <span class="fw-bold text-success">Sifat Nazorati (OTK)</span>
+                        <span class="badge-pill bg-success text-white" t-esc="state.data.stats.quality_pass_rate + '%'"/>
+                    </button>
+
+                    <button class="sidebar-nav-btn" t-att-class="{ 'active': state.activeTab === 'workers' }" t-on-click="() => this.switchTab('workers')">
+                        <i class="fa fa-users"/>
+                        <span>Xodimlar Unumi</span>
+                    </button>
+
+                    <div class="nav-section-title">TIJORAT &amp; HAMKORLAR</div>
+
+                    <button class="sidebar-nav-btn" t-att-class="{ 'active': state.activeTab === 'brands' }" t-on-click="() => this.switchTab('brands')">
+                        <i class="fa fa-tags"/>
+                        <span>Brand Buyurtmalari (B2B)</span>
+                        <span class="badge-pill" t-esc="state.data.brand_orders.length || 0"/>
+                    </button>
+
+                    <button class="sidebar-nav-btn" t-att-class="{ 'active': state.activeTab === 'subcontract' }" t-on-click="() => this.switchTab('subcontract')">
+                        <i class="fa fa-share-alt"/>
+                        <span>Sub-pudrat (Bosma/Kashta)</span>
+                    </button>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="online-pill">
+                        <span class="dot"/>
+                        <span>Konveyer Faol (Odoo 19)</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- -------------------------------------------------------- -->
+            <!-- O'NG MAYDON (ASOSIY ISH MAYDONI)                         -->
+            <!-- -------------------------------------------------------- -->
+            <main class="tekstil-main">
+                <!-- Topbar -->
+                <header class="tekstil-topbar">
+                    <div class="topbar-title">
+                        <h2 t-esc="currentTabTitle"/>
+                        <span class="crumb-tag">Tekstil Ishlab Chiqarish Markazi</span>
+                    </div>
+                    <div class="topbar-actions">
+                        <button class="btn-refresh" t-on-click="loadData">
+                            <i class="fa fa-refresh"/>
+                            <span>Yangilash</span>
+                        </button>
+                        <button class="btn-new-batch" t-on-click="openQuickBatchModal">
+                            <i class="fa fa-plus-circle"/>
+                            <span>Yangi Partiya (Kroy)</span>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Body Contents -->
+                <div class="tekstil-body">
+                    <!-- LOADING STATE -->
+                    <t t-if="state.loading">
+                        <div class="text-center py-5">
+                            <i class="fa fa-spinner fa-spin fa-3x text-primary mb-3"/>
+                            <h5 class="text-muted">Ma'lumotlar yuklanmoqda...</h5>
+                        </div>
+                    </t>
+
+                    <t t-else="">
+                        <!-- ==================================================== -->
+                        <!-- 1. TAB: UMUMIY BOSHQARUV (OVERVIEW)                  -->
+                        <!-- ==================================================== -->
+                        <t t-if="state.activeTab === 'overview'">
+                            <!-- KPI Kartalar -->
+                            <div class="kpi-grid">
+                                <div class="kpi-card">
+                                    <div class="kpi-info">
+                                        <div class="kpi-label">Bugungi Chiqim (Fakt)</div>
+                                        <div class="kpi-value"><t t-esc="state.data.stats.today_produced"/> <span class="fs-6 text-muted">dona</span></div>
+                                        <div class="kpi-sub"><i class="fa fa-arrow-up"/> Reja jadvali bo'yicha</div>
+                                    </div>
+                                    <div class="kpi-icon-box blue"><i class="fa fa-check"/></div>
+                                </div>
+
+                                <div class="kpi-card">
+                                    <div class="kpi-info">
+                                        <div class="kpi-label">Haftalik Reja Bajarilishi</div>
+                                        <div class="kpi-value"><t t-esc="state.data.stats.plan_rate"/>%</div>
+                                        <div class="kpi-sub">
+                                            <t t-esc="state.data.stats.plan_produced"/> / <t t-esc="state.data.stats.plan_target"/> dona
+                                        </div>
+                                    </div>
+                                    <div class="kpi-icon-box amber"><i class="fa fa-line-chart"/></div>
+                                </div>
+
+                                <div class="kpi-card">
+                                    <div class="kpi-info">
+                                        <div class="kpi-label">OTK Sifat Ko'rsatkichi</div>
+                                        <div class="kpi-value text-success"><t t-esc="state.data.stats.quality_pass_rate"/>%</div>
+                                        <div class="kpi-sub text-success"><i class="fa fa-shield"/> 1-nav (Eksport sifati)</div>
+                                    </div>
+                                    <div class="kpi-icon-box green"><i class="fa fa-star"/></div>
+                                </div>
+
+                                <div class="kpi-card">
+                                    <div class="kpi-info">
+                                        <div class="kpi-label">Konveyerdagi Partiyalar</div>
+                                        <div class="kpi-value"><t t-esc="state.data.stats.active_batches_count"/> <span class="fs-6 text-muted">kroy</span></div>
+                                        <div class="kpi-sub"><i class="fa fa-refresh"/> 7 bosqichda faol</div>
+                                    </div>
+                                    <div class="kpi-icon-box purple"><i class="fa fa-cogs"/></div>
+                                </div>
+
+                                <div class="kpi-card">
+                                    <div class="kpi-info">
+                                        <div class="kpi-label">Faol Brand Buyurtmalari</div>
+                                        <div class="kpi-value"><t t-esc="state.data.stats.active_orders_count"/> <span class="fs-6 text-muted">ta</span></div>
+                                        <div class="kpi-sub text-primary"><i class="fa fa-handshake-o"/> B2B shartnomalar</div>
+                                    </div>
+                                    <div class="kpi-icon-box rose"><i class="fa fa-briefcase"/></div>
+                                </div>
+                            </div>
+
+                            <!-- Konveyer Oqimi Tezkor Qisqartmasi -->
+                            <div class="dashboard-panel">
+                                <div class="panel-header">
+                                    <h3><i class="fa fa-tasks text-primary"/> Konveyer Oqimi (Tezkor Ko'rinish)</h3>
+                                    <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.switchTab('conveyor')">Barcha partiyalar</button>
+                                </div>
+
+                                <div class="conveyor-pipeline">
+                                    <t t-foreach="stagesList" t-as="st" t-key="st.key">
+                                        <div class="pipeline-col">
+                                            <div class="col-header">
+                                                <div class="col-title"><t t-esc="st.icon"/> <t t-esc="st.label"/></div>
+                                                <span class="col-badge" t-esc="getBatchesInStage(st.key).length"/>
+                                            </div>
+                                            <div class="batch-card-list">
+                                                <t t-foreach="getBatchesInStage(st.key).slice(0, 3)" t-as="b" t-key="b.id">
+                                                    <div class="batch-mini-card" t-on-click="() => this.openBatchForm(b.id)">
+                                                        <div class="batch-top">
+                                                            <span class="batch-code" t-esc="b.name"/>
+                                                            <span class="batch-qty" t-esc="b.quantity + ' dona'"/>
+                                                        </div>
+                                                        <div class="batch-prod" t-esc="b.product_name"/>
+                                                        <div class="batch-footer">
+                                                            <span><i class="fa fa-user"/> <t t-esc="b.current_worker"/></span>
+                                                            <button class="btn-next-step" t-on-click.stop="() => this.advanceBatch(b.id)">Keyingisi</button>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <!-- Liniyalar va Bugungi Xodimlar Reytingi -->
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <div class="dashboard-panel">
+                                        <div class="panel-header">
+                                            <h3><i class="fa fa-trophy text-warning"/> Bugungi Xodimlar Unumi (Top Ishchilar)</h3>
+                                            <button class="btn btn-sm btn-link" t-on-click="() => this.switchTab('tablet')">Planshet ochish</button>
+                                        </div>
+                                        <table class="tekstil-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Xodim</th>
+                                                    <th>Bo'lim</th>
+                                                    <th>Bajarilgan</th>
+                                                    <th>Ishbay Haq</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="state.data.worker_outputs.slice(0, 5)" t-as="w" t-key="w.id">
+                                                    <tr>
+                                                        <td>
+                                                            <div class="fw-bold" t-esc="w.name"/>
+                                                            <span class="small text-muted" t-esc="w.job_title"/>
+                                                        </td>
+                                                        <td><span class="badge bg-light text-dark" t-esc="w.department"/></td>
+                                                        <td><strong class="text-primary" t-esc="w.quantity"/> dona</td>
+                                                        <td class="text-success fw-bold"><t t-esc="formatNumber(w.total_wage)"/> so'm</td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <div class="dashboard-panel">
+                                        <div class="panel-header">
+                                            <h3><i class="fa fa-shield text-success"/> Sifat Nazorati Xulosasi</h3>
+                                        </div>
+                                        <div class="p-3 bg-light rounded-3 mb-3 text-center">
+                                            <div class="fs-1 fw-bold text-success"><t t-esc="state.data.stats.quality_pass_rate"/>%</div>
+                                            <div class="text-muted small">1-navga qabul qilinganlik ko'rsatkichi</div>
+                                        </div>
+                                        <ul class="list-group list-group-flush small">
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>1-Nav (Eksport)</span>
+                                                <strong class="text-success"><t t-esc="state.data.stats.qc_totals.grade_1"/> dona</strong>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>2-Nav (Kichik nuqson)</span>
+                                                <strong class="text-warning"><t t-esc="state.data.stats.qc_totals.grade_2"/> dona</strong>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Qayta ishlashga (Tuzatish)</span>
+                                                <strong class="text-orange"><t t-esc="state.data.stats.qc_totals.rework"/> dona</strong>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Brak (Yaroqsiz)</span>
+                                                <strong class="text-danger"><t t-esc="state.data.stats.qc_totals.reject"/> dona</strong>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- ==================================================== -->
+                        <!-- 2. TAB: KONVEYER & PARTIYALAR                        -->
+                        <!-- ==================================================== -->
+                        <t t-if="state.activeTab === 'conveyor'">
+                            <div class="dashboard-panel">
+                                <div class="panel-header">
+                                    <div>
+                                        <h3><i class="fa fa-random text-primary"/> Konveyer Oqimi (7 Bosqich)</h3>
+                                        <span class="panel-sub">Har bir partiyani bosqichma-bosqich kuzatish va bitta tugma bilan keyingi bosqichga o'tkazish</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" t-on-click="openQuickBatchModal">
+                                        <i class="fa fa-plus"/> Yangi Kroy Yaratish
+                                    </button>
+                                </div>
+
+                                <div class="conveyor-pipeline">
+                                    <t t-foreach="stagesList" t-as="st" t-key="st.key">
+                                        <div class="pipeline-col">
+                                            <div class="col-header">
+                                                <div class="col-title"><t t-esc="st.icon"/> <t t-esc="st.label"/></div>
+                                                <span class="col-badge" t-esc="getBatchesInStage(st.key).length"/>
+                                            </div>
+                                            <div class="batch-card-list">
+                                                <t t-foreach="getBatchesInStage(st.key)" t-as="b" t-key="b.id">
+                                                    <div class="batch-mini-card" t-on-click="() => this.openBatchForm(b.id)">
+                                                        <div class="batch-top">
+                                                            <span class="batch-code" t-esc="b.name"/>
+                                                            <span class="batch-qty" t-esc="b.quantity + ' dona'"/>
+                                                        </div>
+                                                        <div class="batch-prod" t-esc="b.product_name"/>
+                                                        <div class="small text-muted mb-2">
+                                                            <span>Rang: <t t-esc="b.color"/></span> | 
+                                                            <span>Rulon: <t t-esc="b.roll_number"/></span>
+                                                        </div>
+                                                        <div class="batch-footer">
+                                                            <span><i class="fa fa-user"/> <t t-esc="b.current_worker"/></span>
+                                                            <t t-if="b.stage !== 'done'">
+                                                                <button class="btn-next-step" t-on-click.stop="() => this.advanceBatch(b.id)">Keyingi bosqich &gt;</button>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <span class="badge bg-success">Tayyor</span>
+                                                            </t>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- ==================================================== -->
+                        <!-- 3. TAB: REJALASHTIRISH (PLANNING)                    -->
+                        <!-- ==================================================== -->
+                        <t t-if="state.activeTab === 'planning'">
+                            <div class="dashboard-panel">
+                                <div class="panel-header">
+                                    <div>
+                                        <h3><i class="fa fa-calendar-check-o text-primary"/> Ishlab Chiqarish Rejalari</h3>
+                                        <span class="panel-sub">Haftalik va oylik kiyimlar ishlab chiqarish rejasi, razmerlar matritsasi va bajarilish nazorati</span>
+                                    </div>
+                                </div>
+
+                                <t t-foreach="state.data.plans" t-as="plan" t-key="plan.id">
+                                    <div class="card mb-4 border-0 shadow-sm rounded-4 overflow-hidden">
+                                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                                            <div>
+                                                <h5 class="mb-0 fw-bold text-dark" t-esc="plan.name"/>
+                                                <span class="text-muted small"><i class="fa fa-clock-o"/> <t t-esc="plan.date_start"/> dan <t t-esc="plan.date_end"/> gacha</span>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="text-end">
+                                                    <div class="small text-muted">Bajarilish: <t t-esc="plan.produced_qty"/> / <t t-esc="plan.target_qty"/> dona</div>
+                                                    <div class="progress" style="width: 140px; height: 8px;">
+                                                        <div class="progress-bar bg-success" role="progressbar" t-att-style="'width:' + plan.completion_rate + '%'"/>
+                                                    </div>
+                                                </div>
+                                                <span class="badge bg-primary fs-6 px-3 py-2"><t t-esc="plan.completion_rate"/>%</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body p-0">
+                                            <table class="tekstil-table mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Liniya / Sex</th>
+                                                        <th>Mahsulot</th>
+                                                        <th>Rangi</th>
+                                                        <th>Razmerlar (S / M / L / XL)</th>
+                                                        <th>Reja (dona)</th>
+                                                        <th>Fakt (dona)</th>
+                                                        <th>Bajarilish</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="plan.lines" t-as="l" t-key="l.id">
+                                                        <tr>
+                                                            <td><span class="badge bg-light text-dark"><t t-esc="l.line_code"/></span></td>
+                                                            <td class="fw-bold" t-esc="l.product_name"/>
+                                                            <td><t t-esc="l.color"/></td>
+                                                            <td><span class="badge bg-secondary font-monospace" t-esc="l.sizes"/></td>
+                                                            <td class="fw-bold"><t t-esc="l.planned_qty"/></td>
+                                                            <td class="fw-bold text-success"><t t-esc="l.produced_qty"/></td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <div class="progress flex-grow-1" style="height: 6px;">
+                                                                        <div class="progress-bar bg-success" t-att-style="'width:' + l.completion_rate + '%'"/>
+                                                                    </div>
+                                                                    <span class="small fw-bold" t-esc="l.completion_rate + '%'"/>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- ==================================================== -->
+                        <!-- 4. TAB: BO'LIM PLANSHETI (KIOSK MODE)                -->
+                        <!-- ==================================================== -->
+                        <t t-if="state.activeTab === 'tablet'">
+                            <div class="tablet-kiosk">
+                                <div class="kiosk-card">
+                                    <div class="kiosk-header">
+                                        <div class="kiosk-title">
+                                            <div class="kiosk-icon">📱</div>
+                                            <div>
+                                                <h3>Bo'lim Plansheti (Kiosk Rejimi)</h3>
+                                                <p>Har bir ishchi o'z kartasini tanlab, bajargan sonini kiritadi</p>
+                                            </div>
+                                        </div>
+                                        <div class="kiosk-dept-selector">
+                                            <button class="btn-dept" t-att-class="{ 'active': state.tablet.dept === 'cutting' }" t-on-click="() => this.setTabletDept('cutting')">✂️ Bichuv</button>
+                                            <button class="btn-dept" t-att-class="{ 'active': state.tablet.dept === 'sewing' }" t-on-click="() => this.setTabletDept('sewing')">🪡 Tikuv</button>
+                                            <button class="btn-dept" t-att-class="{ 'active': state.tablet.dept === 'ironing' }" t-on-click="() => this.setTabletDept('ironing')">💨 Dazmol</button>
+                                            <button class="btn-dept" t-att-class="{ 'active': state.tablet.dept === 'packing' }" t-on-click="() => this.setTabletDept('packing')">📦 Qadoq</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 1-QADAM: Xodimlarni tanlash -->
+                                    <div class="kiosk-step-label">1. Xodimni tanlang:</div>
+                                    <div class="workers-touch-grid">
+                                        <t t-foreach="state.data.employees" t-as="emp" t-key="emp.id">
+                                            <div class="worker-touch-card" t-att-class="{ 'selected': state.tablet.employeeId === emp.id }" t-on-click="() => this.selectTabletEmployee(emp.id)">
+                                                <div class="avatar-circle"><t t-esc="emp.name.substring(0,2).toUpperCase()"/></div>
+                                                <div class="worker-name" t-esc="emp.name"/>
+                                                <div class="worker-role" t-esc="emp.job_title"/>
+                                            </div>
+                                        </t>
+                                    </div>
+
+                                    <!-- 2-QADAM: Partiya va Operatsiya -->
+                                    <div class="kiosk-step-label">2. Partiya va Ish soni:</div>
+                                    <div class="kiosk-inputs-box">
+                                        <div class="form-group">
+                                            <label class="form-label fw-bold">Partiyani tanlang (Kroy):</label>
+                                            <select class="form-select form-select-lg" t-model="state.tablet.batchId">
+                                                <t t-foreach="state.data.batches" t-as="b" t-key="b.id">
+                                                    <option t-att-value="b.id"><t t-esc="b.name"/> - <t t-esc="b.product_name"/> (<t t-esc="b.quantity"/> dona)</option>
+                                                </t>
+                                            </select>
+
+                                            <label class="form-label fw-bold mt-3">Operatsiya nomi:</label>
+                                            <input type="text" class="form-control" t-model="state.tablet.operationName" placeholder="Masalan: Yoqa tikish / Asosiy tikuv"/>
+
+                                            <label class="form-label fw-bold mt-3">1 dona uchun ishbay haq (so'm):</label>
+                                            <input type="number" class="form-control" t-model="state.tablet.pieceRate"/>
+                                        </div>
+
+                                        <div class="numpad-display">
+                                            <div class="text-muted small">Bajarilgan Dona Soni:</div>
+                                            <div class="num-val"><t t-esc="state.tablet.quantity"/></div>
+                                            <div class="quick-buttons">
+                                                <button class="btn-quick-add" t-on-click="() => this.addTabletQty(10)">+10</button>
+                                                <button class="btn-quick-add" t-on-click="() => this.addTabletQty(25)">+25</button>
+                                                <button class="btn-quick-add" t-on-click="() => this.addTabletQty(50)">+50</button>
+                                                <button class="btn-quick-add" t-on-click="() => this.addTabletQty(100)">+100</button>
+                                                <button class="btn-quick-add text-danger" t-on-click="resetTabletQty">C</button>
+                                            </div>
+                                            <div class="mt-3 text-success fw-bold">
+                                                Hisoblangan ish haqi: <t t-esc="formatNumber(state.tablet.quantity * state.tablet.pieceRate)"/> so'm
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button class="btn-kiosk-submit" t-on-click="submitTabletOutput">
+                                        <i class="fa fa-check-circle"/> SAQLASH VA RO'YXATGA OLISH
+                                    </button>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- ==================================================== -->
+                        <!-- 5. TAB: SIFAT NAZORATI (OTK STATION)                 -->
+                        <!-- ==================================================== -->
+                        <t t-if="state.activeTab === 'quality'">
+                            <div class="otk-layout">
+                                <!-- OTK Tezkor Tekshirish Shakli -->
+                                <div class="otk-form-box">
+                                    <h4><i class="fa fa-shield text-success"/> Yangi OTK Qabuli (Partiya bo'yicha)</h4>
+                                    
+                                    <div class="form-group">
+                                        <label>Partiya (Kroy):</label>
+                                        <select t-model="state.qcForm.batchId" t-on-change="onQcBatchChange">
+                                            <t t-foreach="state.data.batches" t-as="b" t-key="b.id">
+                                                <option t-att-value="b.id"><t t-esc="b.name"/> - <t t-esc="b.product_name"/></option>
+                                            </t>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Tekshirilgan Jami Soni (dona):</label>
+                                        <input type="number" t-model="state.qcForm.inspectedQty" t-on-input="recalcQcRates"/>
+                                    </div>
+
+                                    <div class="otk-grade-grid">
+                                        <div class="grade-box grade-1">
+                                            <div class="grade-title">1-Nav (Eksport)</div>
+                                            <input type="number" t-model="state.qcForm.grade1" t-on-input="recalcQcRates"/>
+                                        </div>
+
+                                        <div class="grade-box grade-2">
+                                            <div class="grade-title">2-Nav (Kichik kamchilik)</div>
+                                            <input type="number" t-model="state.qcForm.grade2" t-on-input="recalcQcRates"/>
+                                        </div>
+
+                                        <div class="grade-box grade-rework">
+                                            <div class="grade-title">Tuzatishga (Rework)</div>
+                                            <input type="number" t-model="state.qcForm.rework" t-on-input="recalcQcRates"/>
+                                        </div>
+
+                                        <div class="grade-box grade-reject">
+                                            <div class="grade-title">Brak (Yaroqsiz)</div>
+                                            <input type="number" t-model="state.qcForm.reject" t-on-input="recalcQcRates"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Aniqlangan Nuqson Turi:</label>
+                                        <select t-model="state.qcForm.defectTypeId">
+                                            <option value="">Nuqsonsiz (Toza partiya)</option>
+                                            <t t-foreach="state.data.defect_types" t-as="d" t-key="d.id">
+                                                <option t-att-value="d.id"><t t-esc="d.name"/></option>
+                                            </t>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>OTK Xulosasi va Izoh:</label>
+                                        <textarea rows="2" t-model="state.qcForm.note" placeholder="Masalan: Choklar tekis, etiketkalar to'g'ri..."/>
+                                    </div>
+
+                                    <div class="p-3 bg-light rounded-3 text-center mb-3">
+                                        <div class="text-muted small">Hisoblangan Sifat Darajasi:</div>
+                                        <div class="fs-3 fw-bold text-success"><t t-esc="state.qcForm.passRate"/>%</div>
+                                    </div>
+
+                                    <button class="btn-submit-otk" t-on-click="submitQcCheck">
+                                        <i class="fa fa-check"/> OTK XULOSASINI TASDIQLASH
+                                    </button>
+                                </div>
+
+                                <!-- O'tgan OTK Tekshiruvlari Jadvali -->
+                                <div class="dashboard-panel">
+                                    <div class="panel-header">
+                                        <h3><i class="fa fa-history text-muted"/> So'nggi OTK Sifat Jurnallari</h3>
+                                    </div>
+                                    <table class="tekstil-table">
+                                        <thead>
+                                            <tr>
+                                                <th>QC Kodi</th>
+                                                <th>Partiya &amp; Mahsulot</th>
+                                                <th>Tekshirildi</th>
+                                                <th>1-Nav</th>
+                                                <th>2-Nav</th>
+                                                <th>Tuzatish</th>
+                                                <th>Brak</th>
+                                                <th>Sifat %</th>
+                                                <th>Holat</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.data.qc_checks" t-as="qc" t-key="qc.id">
+                                                <tr>
+                                                    <td><strong class="text-primary" t-esc="qc.name"/></td>
+                                                    <td>
+                                                        <div class="fw-bold" t-esc="qc.batch_name"/>
+                                                        <span class="small text-muted" t-esc="qc.product_name"/>
+                                                    </td>
+                                                    <td><t t-esc="qc.inspected_qty"/></td>
+                                                    <td class="text-success fw-bold"><t t-esc="qc.grade_1_qty"/></td>
+                                                    <td class="text-warning"><t t-esc="qc.grade_2_qty"/></td>
+                                                    <td class="text-orange"><t t-esc="qc.rework_qty"/></td>
+                                                    <td class="text-danger"><t t-esc="qc.reject_qty"/></td>
+                                                    <td>
+                                                        <span class="badge bg-success" t-esc="qc.pass_rate + '%'"/>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-light text-dark" t-esc="qc.state"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- ==================================================== -->
+                        <!-- 6. TAB: XODIMLAR UNUMI (PIECE RATE & WAGES)          -->
+                        <!-- ==================================================== -->
+                        <t t-if="state.activeTab === 'workers'">
+                            <div class="dashboard-panel">
+                                <div class="panel-header">
+                                    <div>
+                                        <h3><i class="fa fa-users text-primary"/> Xodimlar Unumdorligi va Ishbay Haq Hisobi</h3>
+                                        <span class="panel-sub">Kim nechta mahsulot tikdi, qaysi operatsiyani bajardi va qancha ish haqi hisoblandi</span>
+                                    </div>
+                                </div>
+
+                                <table class="tekstil-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Usta / Xodim</th>
+                                            <th>Lavozim</th>
+                                            <th>Bo'lim</th>
+                                            <th>Bugungi Natija (Dona)</th>
+                                            <th>Kunlik Ishbay Haq (So'm)</th>
+                                            <th>Samaradorlik Ko'rsatkichi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.data.worker_outputs" t-as="w" t-key="w.id">
+                                            <tr>
+                                                <td class="fw-bold text-dark fs-6" t-esc="w.name"/>
+                                                <td class="text-muted" t-esc="w.job_title"/>
+                                                <td><span class="badge bg-light text-dark" t-esc="w.department"/></td>
+                                                <td><strong class="text-primary fs-5" t-esc="w.quantity"/> dona</td>
+                                                <td class="text-success fw-bold fs-6"><t t-esc="formatNumber(w.total_wage)"/> so'm</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                                            <div class="progress-bar bg-success" t-att-style="'width:' + Math.min(100, (w.quantity / 150 * 100)) + '%'"/>
+                                                        </div>
+                                                        <span class="small fw-bold text-muted"><t t-esc="Math.min(100, Math.round(w.quantity / 150 * 100))"/>%</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+
+                        <!-- ==================================================== -->
+                        <!-- 7. TAB: B2B BRAND BUYURTMALARI                       -->
+                        <!-- ==================================================== -->
+                        <t t-if="state.activeTab === 'brands'">
+                            <div class="dashboard-panel">
+                                <div class="panel-header">
+                                    <div>
+                                        <h3><i class="fa fa-tags text-primary"/> Brand Buyurtmalari (B2B OEM / Private Label)</h3>
+                                        <span class="panel-sub">Tashqi kiyim brendlari (Terra Pro, Just va h.k.) uchun shartnoma asosida tikilayotgan partiyalar</span>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <t t-foreach="state.data.brand_orders" t-as="o" t-key="o.id">
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card h-100 border-0 shadow-sm rounded-4 p-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="badge bg-primary fs-6 px-3 py-1" t-esc="o.brand_name"/>
+                                                    <span class="badge bg-light text-dark" t-esc="o.name"/>
+                                                </div>
+                                                <h5 class="fw-bold mb-1" t-esc="o.product_name"/>
+                                                <div class="small text-muted mb-2">
+                                                    Mijoz: <strong t-esc="o.partner_name"/> | Rang: <strong t-esc="o.color"/>
+                                                </div>
+                                                <div class="p-2 bg-light rounded-3 small mb-3">
+                                                    O'lchamlar: <strong class="font-monospace text-primary" t-esc="o.sizes"/>
+                                                </div>
+                                                <div class="d-flex justify-content-between small text-muted mb-1">
+                                                    <span>Bajarilish: <strong class="text-dark" t-esc="o.produced_qty"/> / <t t-esc="o.total_qty"/> dona</span>
+                                                    <span>Muddati: <strong class="text-danger" t-esc="o.delivery_date"/></span>
+                                                </div>
+                                                <div class="progress mb-3" style="height: 8px;">
+                                                    <div class="progress-bar bg-success" t-att-style="'width:' + o.completion_rate + '%'"/>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                                    <span class="fw-bold text-dark">Shartnoma: <t t-esc="formatNumber(o.total_amount)"/> so'm</span>
+                                                    <span class="badge bg-success" t-esc="o.state"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- ==================================================== -->
+                        <!-- 8. TAB: SUB-PUDRAT                                   -->
+                        <!-- ==================================================== -->
+                        <t t-if="state.activeTab === 'subcontract'">
+                            <div class="dashboard-panel">
+                                <div class="panel-header">
+                                    <div>
+                                        <h3><i class="fa fa-share-alt text-primary"/> Sub-pudrat Xizmatlari Monitoringi</h3>
+                                        <span class="panel-sub">Tashqi korxonalarga yuborilgan bosma (print), kashtachilik va bo'yash jarayonlari nazorati</span>
+                                    </div>
+                                </div>
+
+                                <table class="tekstil-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Sub-pudrat Kodi</th>
+                                            <th>Hamkor Korxona</th>
+                                            <th>Xizmat Turi</th>
+                                            <th>Partiya</th>
+                                            <th>Yuborildi</th>
+                                            <th>Qabul Qilindi</th>
+                                            <th>Yo'qotish (Brak)</th>
+                                            <th>Yuborilgan Sana</th>
+                                            <th>Kutilayotgan Sana</th>
+                                            <th>Holat</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.data.subcontracts" t-as="sub" t-key="sub.id">
+                                            <tr>
+                                                <td><strong class="text-primary" t-esc="sub.name"/></td>
+                                                <td class="fw-bold" t-esc="sub.partner_name"/>
+                                                <td><span class="badge bg-info text-white" t-esc="sub.service_label"/></td>
+                                                <td><t t-esc="sub.batch_name"/></td>
+                                                <td class="fw-bold"><t t-esc="sub.sent_qty"/> dona</td>
+                                                <td class="fw-bold text-success"><t t-esc="sub.received_qty"/> dona</td>
+                                                <td class="text-danger"><t t-esc="sub.defect_qty"/> dona</td>
+                                                <td><t t-esc="sub.date_sent"/></td>
+                                                <td class="text-warning fw-bold"><t t-esc="sub.date_expected"/></td>
+                                                <td><span class="badge bg-light text-dark" t-esc="sub.state"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+                    </t>
+                </div>
+            </main>
+        </div>
+    </t>
+</templates>

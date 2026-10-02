@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tekstil_subcontract_tree" model="ir.ui.view">
+        <field name="name">tekstil.subcontract.order.tree</field>
+        <field name="model">tekstil.subcontract.order</field>
+        <field name="arch" type="xml">
+            <list string="Sub-pudrat Buyurtmalari" decoration-info="state == 'draft'" decoration-warning="state == 'sent'" decoration-success="state == 'received'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="service_type" widget="badge"/>
+                <field name="batch_id"/>
+                <field name="sent_qty" sum="Jami Yuborildi"/>
+                <field name="received_qty" sum="Jami Qabul"/>
+                <field name="defect_qty" sum="Jami Yo'qotish"/>
+                <field name="total_cost" sum="Jami Xarajat"/>
+                <field name="date_sent"/>
+                <field name="date_expected"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tekstil_subcontract_form" model="ir.ui.view">
+        <field name="name">tekstil.subcontract.order.form</field>
+        <field name="model">tekstil.subcontract.order</field>
+        <field name="arch" type="xml">
+            <form string="Sub-pudrat Xizmati">
+                <header>
+                    <button name="action_send" type="object" string="Tashqariga Yuborish" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_receive" type="object" string="Sexga Qabul Qilish" class="btn-success" invisible="state != 'sent'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,received"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Sub-pudrat Kodi"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Xizmat va Hamkor">
+                            <field name="partner_id"/>
+                            <field name="service_type"/>
+                            <field name="batch_id"/>
+                        </group>
+                        <group string="Miqdorlar va Muddatlar">
+                            <field name="sent_qty"/>
+                            <field name="received_qty"/>
+                            <field name="defect_qty"/>
+                            <field name="cost_per_unit"/>
+                            <field name="total_cost"/>
+                            <field name="date_sent"/>
+                            <field name="date_expected"/>
+                            <field name="date_received"/>
+                        </group>
+                    </group>
+                    <group string="Izoh va Texnik Topshiriq">
+                        <field name="note" placeholder="Dizayn fayli, rang kodi, bosma o'lchami..."/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tekstil_subcontract_orders" model="ir.actions.act_window">
+        <field name="name">Sub-pudrat Xizmatlari</field>
+        <field name="res_model">tekstil.subcontract.order</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

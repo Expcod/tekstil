@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tekstil_brand_order_tree" model="ir.ui.view">
+        <field name="name">tekstil.brand.order.tree</field>
+        <field name="model">tekstil.brand.order</field>
+        <field name="arch" type="xml">
+            <list string="Brand Buyurtmalari (B2B)" decoration-info="state == 'draft'" decoration-warning="state == 'in_prod'" decoration-success="state in ('ready', 'shipped')">
+                <field name="name"/>
+                <field name="brand_name"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="color"/>
+                <field name="total_qty" sum="Jami Buyurtma"/>
+                <field name="produced_qty" sum="Jami Bajarildi"/>
+                <field name="completion_rate" widget="progressbar"/>
+                <field name="total_amount" sum="Jami Summa"/>
+                <field name="delivery_date"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tekstil_brand_order_form" model="ir.ui.view">
+        <field name="name">tekstil.brand.order.form</field>
+        <field name="model">tekstil.brand.order</field>
+        <field name="arch" type="xml">
+            <form string="B2B Brand Buyurtmasi">
+                <header>
+                    <button name="action_confirm" type="object" string="Tasdiqlash" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_in_prod" type="object" string="Ishlab Chiqarishga Berish" class="oe_highlight" invisible="state != 'confirmed'"/>
+                    <button name="action_ready" type="object" string="Tayyor (Omborga)" class="btn-success" invisible="state != 'in_prod'"/>
+                    <button name="action_ship" type="object" string="Mijozga Yuklash" class="oe_highlight" invisible="state != 'ready'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_prod,ready,shipped"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Buyurtma Raqami"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Mijoz &amp; Brand">
+                            <field name="partner_id"/>
+                            <field name="brand_name" placeholder="Masalan: Terra Pro, Just"/>
+                            <field name="product_id"/>
+                            <field name="color"/>
+                        </group>
+                        <group string="Moliyaviy va Muddat">
+                            <field name="unit_price"/>
+                            <field name="total_qty"/>
+                            <field name="total_amount"/>
+                            <field name="delivery_date"/>
+                            <field name="produced_qty"/>
+                            <field name="completion_rate" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <group string="Razmerlar Taqsimoti (Dona)">
+                        <group>
+                            <field name="qty_xs"/>
+                            <field name="qty_s"/>
+                            <field name="qty_m"/>
+                        </group>
+                        <group>
+                            <field name="qty_l"/>
+                            <field name="qty_xl"/>
+                            <field name="qty_2xl"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Bog'langan Kroy Partiyalari" name="batches">
+                            <field name="batch_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="stage"/>
+                                    <field name="qc_passed_qty"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Talablar va Texnik Shartlar" name="notes">
+                            <field name="note" placeholder="Yorliq qadash qoidalari, qadoqlash talablari..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tekstil_brand_orders" model="ir.actions.act_window">
+        <field name="name">Brand Buyurtmalari (B2B)</field>
+        <field name="res_model">tekstil.brand.order</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
