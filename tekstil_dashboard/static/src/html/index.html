@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ro'mol ERP - Ishlab Chiqarish va Moliya Boshqaruvi</title>
+  <link rel="stylesheet" href="/tekstil_dashboard/static/src/html/css/style.css">
+</head>
+<body>
+
+  <div class="app-layout">
+
+    <!-- ======================================================== -->
+    <!-- CHAP ASOSIY SIDEBAR                                      -->
+    <!-- ======================================================== -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand" onclick="switchTab('dashboard')">
+          <div class="brand-icon">⚡</div>
+          <div class="brand-info">
+            <div class="brand-name">Ro'mol ERP</div>
+            <div class="brand-sub">Tikuv & Ishlab chiqarish</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vertikal Menyu Navigatsiyasi -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">ASOSIY MENYU</div>
+
+        <button class="sidebar-nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Boshqaruv</span>
+        </button>
+
+        <button class="sidebar-nav-item" data-tab="conveyor" onclick="switchTab('conveyor')">
+          <span class="nav-icon">🔄</span>
+          <span class="nav-text">Konveyer & BoM</span>
+          <span class="sidebar-badge badge-blue" id="badge-conveyor-count">0</span>
+        </button>
+
+        <button class="sidebar-nav-item" data-tab="raw_materials" onclick="switchTab('raw_materials')">
+          <span class="nav-icon">🧵</span>
+          <span class="nav-text">Xomashyo Ombori</span>
+          <span class="sidebar-badge badge-red" id="badge-raw-count" style="display:none;">0</span>
+        </button>
+
+        <button class="sidebar-nav-item" data-tab="finished_goods" onclick="switchTab('finished_goods')">
+          <span class="nav-icon">📦</span>
+          <span class="nav-text">Tayyor Ro'mollar</span>
+        </button>
+
+        <button class="sidebar-nav-item" data-tab="clients" onclick="switchTab('clients')">
+          <span class="nav-icon">🤝</span>
+          <span class="nav-text">Mijozlar & Oldi-Berdi</span>
+          <span class="sidebar-badge badge-red" id="badge-clients-debt" style="display:none;">0</span>
+        </button>
+
+        <button class="sidebar-nav-item" data-tab="finance" onclick="switchTab('finance')">
+          <span class="nav-icon">💵</span>
+          <span class="nav-text">Moliya & Foyda</span>
+          <span class="sidebar-badge badge-green">P&L</span>
+        </button>
+
+        <button class="sidebar-nav-item" data-tab="history" onclick="switchTab('history')">
+          <span class="nav-icon">📜</span>
+          <span class="nav-text">Seh Tarixi</span>
+        </button>
+      </nav>
+
+      <!-- Pastki qism: Profil va Qayta tiklash -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card">
+          <div class="user-avatar">AR</div>
+          <div class="user-meta" style="flex:1;">
+            <span class="user-name">Alisher R.</span>
+            <span class="user-role">Seh boshlig'i</span>
+          </div>
+          <button class="circle-btn mini-reset-btn" onclick="resetDemoData()" title="Namunani qayta tiklash">🔄</button>
+        </div>
+        <div class="sidebar-status-tag">
+          <span class="pulse-dot"></span>
+          <span>Tizim faol (Online)</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ======================================================== -->
+    <!-- O'NG TOMONDAGI ASOSIY ISHCHI MAYDON (MAIN VIEWPORT)      -->
+    <!-- ======================================================== -->
+    <div class="main-viewport">
+      <!-- Yuqori yengil boshqaruv paneli -->
+      <header class="main-topbar">
+        <div class="topbar-left">
+          <div class="topbar-breadcrumb">
+            <span class="crumb-root">Seh Boshqaruvi</span>
+            <span class="crumb-separator">/</span>
+            <span class="crumb-current" id="topbar-current-tab-title">📊 Ishlab Chiqarish va Ombor (Umumiy Boshqaruv)</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-date-pill">
+            <span>📅</span>
+            <span id="topbar-live-date">25 Sentabr, 2026</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="main-content-area">
+
+
+    <!-- ======================================================== -->
+    <!-- 1. BOSH QARUV TABI (DASHBOARD)                           -->
+    <!-- ======================================================== -->
+    <div id="tab-content-dashboard">
+      <div class="overview-header">
+        <div class="header-title-box">
+          <h1>Ishlab Chiqarish va Ombor (Umumiy Boshqaruv)</h1>
+          <p>Sehdagi umumiy holat, oylik reja va zaxiralar monitoringi</p>
+        </div>
+        <div class="header-actions">
+          <button class="pill-action-btn"><span>📅 Bu oy</span><span style="font-size:11px;">▾</span></button>
+          <button class="pill-action-btn btn-primary" onclick="openNewBatchModal()"><span>⚡ + Yangi Partiya</span></button>
+        </div>
+      </div>
+
+      <div class="kpi-cards-grid">
+        <div class="kpi-stat-card hero-blue">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Tayyor Ro'mollar Astatkasi</span>
+            <div class="kpi-icon-circle">📦</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="dash-kpi-finished">0 dona</span>
+              <span class="kpi-pill-badge badge-white">0 dona</span>
+            </div>
+            <div class="kpi-bottom-subtext">Tayyor ombordagi qoldiq</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Konveyerda (Jarayonda)</span>
+            <div class="kpi-icon-circle dark-circle">🔄</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="dash-kpi-process">0 dona</span>
+              <span class="kpi-pill-badge badge-blue">0 bosqichda</span>
+            </div>
+            <div class="kpi-bottom-subtext">Bichuv, tikuv, dazmol va salafanda</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Rulon Matolar Zaxirasi</span>
+            <div class="kpi-icon-circle blue-soft">🧵</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="dash-kpi-fabric">0 m</span>
+              <span class="kpi-pill-badge badge-blue">0 metr</span>
+            </div>
+            <div class="kpi-bottom-subtext">Minimal me'yor: 300 metr</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Oylik Reja Bajarilishi</span>
+            <div class="kpi-icon-circle blue-soft" style="background:#eff6ff; color:#1e60ff;">📈</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="dash-kpi-plan">0%</span>
+              <span class="kpi-pill-badge badge-blue">Reja: 1,500</span>
+            </div>
+            <div class="kpi-bottom-subtext">Oylik ishlab chiqarish spidometri</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- O'rta 2 ustunli blok: BOLTSHIFT BAR CHART & ARC GAUGE -->
+      <div class="middle-dashboard-grid" style="margin-top: 18px; margin-bottom: 20px;">
+        <div class="dashboard-box">
+          <div class="box-header">
+            <div>
+              <div class="box-title">Konveyer Bosqichlari Faolligi (Performance Overview)</div>
+              <div class="box-subtitle">7 ta texnologik bosqich bo'yicha joriy ro'mollar taqsimoti</div>
+            </div>
+            <button class="pill-action-btn" style="padding: 6px 14px; font-size: 12.5px;" onclick="switchTab('conveyor')">
+              <span>Konveyerga o'tish</span> ➔
+            </button>
+          </div>
+          <div class="bolt-chart-container" id="dashboard-bar-chart-container"></div>
+        </div>
+
+        <div class="dashboard-box">
+          <div class="box-header">
+            <div>
+              <div class="box-title">Reja Bajarilishi (Gauge)</div>
+              <div class="box-subtitle">Oylik ishlab chiqarish spidometri</div>
+            </div>
+            <span style="font-size: 18px; color: var(--text-muted);">•••</span>
+          </div>
+
+          <div class="gauge-container">
+            <div class="gauge-svg-wrap">
+              <svg width="220" height="120" viewBox="0 0 220 120" id="gauge-radial-svg">
+                <g transform="translate(110, 110)">
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(0)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(13)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(26)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(39)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(52)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(65)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(78)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(91)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(104)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(117)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(130)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(143)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(156)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(169)" />
+                  <line x1="-95" y1="0" x2="-75" y2="0" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round" transform="rotate(180)" />
+                </g>
+              </svg>
+              <div class="gauge-center-text">
+                <div class="gauge-percent" id="gauge-percent-text">0%</div>
+                <div class="gauge-label">Reja Bajarildi</div>
+              </div>
+            </div>
+
+            <div class="gauge-subcards-row">
+              <div class="gauge-subcard">
+                <span class="gauge-subcard-title">Bugun tayyorlangan</span>
+                <div class="gauge-subcard-val">
+                  <span>0 dona</span>
+                  <span class="mini-growth-tag">0%</span>
+                </div>
+              </div>
+              <div class="gauge-subcard">
+                <span class="gauge-subcard-title">Oylik umumiy hajm</span>
+                <div class="gauge-subcard-val">
+                  <span id="gauge-subcard-total">0 dona</span>
+                  <span class="mini-growth-tag">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Faol Partiyalar Jadvali -->
+      <div class="table-container-card">
+        <div class="table-header-bar">
+          <div class="table-title">Konveyerdagi Faol Partiyalar (Recent Batches)</div>
+          <div class="table-actions-right">
+            <div class="search-pill">
+              <span>🔍</span>
+              <input type="text" placeholder="Partiyani qidirish..." oninput="handleSearch(this.value)">
+            </div>
+            <button class="pill-action-btn" style="padding: 7px 16px; font-size: 13px;" onclick="switchTab('conveyor')">
+              Barchasini ko'rish ➔
+            </button>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;"><input type="checkbox"></th>
+                <th>Partiya ID</th>
+                <th>Rulon ID</th>
+                <th>Ro'mol Modeli</th>
+                <th>Kesilgan Metr</th>
+                <th>Chiqish (Dona)</th>
+                <th>Joriy Bosqich</th>
+                <th>Amal</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-recent-batches"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- 2. KONVEYER & BoM TABI                                    -->
+    <!-- ======================================================== -->
+    <div id="tab-content-conveyor" style="display: none;">
+      <div class="overview-header">
+        <div class="header-title-box">
+          <h1>Konveyer Oqimi va Mahsulot BoM Retseptlari</h1>
+          <p>Rulonlar monitoringi, 7 bosqichli konveyer va texnologik sarf me'yorlari</p>
+        </div>
+        <div class="header-actions">
+          <button class="pill-action-btn" onclick="openBOMModal()"><span>➕ Yangi BoM Retsepti</span></button>
+          <button class="pill-action-btn btn-primary" onclick="openNewBatchModal()"><span>⚡ + Yangi Partiya (Bichuv)</span></button>
+        </div>
+      </div>
+
+      <div class="kpi-cards-grid">
+        <div class="kpi-stat-card hero-blue">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Faol Rulonlar</span>
+            <div class="kpi-icon-circle">🧵</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="conv-kpi-rolls">0 ta</span>
+              <span class="kpi-pill-badge badge-white">0 ta</span>
+            </div>
+            <div class="kpi-bottom-subtext">Hozir kesilib, tikilayotgan</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Bichuv & Donalashda</span>
+            <div class="kpi-icon-circle blue-soft">✂️</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="conv-kpi-cutting">0 dona</span>
+              <span class="kpi-pill-badge badge-blue">1-2 bosqich</span>
+            </div>
+            <div class="kpi-bottom-subtext">Rulondan kesilmoqda</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Tikish & Tosh Bosishda</span>
+            <div class="kpi-icon-circle blue-soft">🪡</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="conv-kpi-sewing">0 dona</span>
+              <span class="kpi-pill-badge badge-blue">3-4 bosqich</span>
+            </div>
+            <div class="kpi-bottom-subtext">Overlog va tosh qadashda</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Dazmol, Etiketka & Salafanda</span>
+            <div class="kpi-icon-circle blue-soft" style="background:#ecfdf5; color:#059669;">📦</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="conv-kpi-finishing">0 dona</span>
+              <span class="kpi-pill-badge badge-blue" style="background:#ecfdf5; color:#059669;">5-7 bosqich</span>
+            </div>
+            <div class="kpi-bottom-subtext">Tayyor omborga chiqish arafasida</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 18px; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div class="pill-navigation" style="background:#ffffff; border:1px solid var(--border-light);">
+          <button class="pill-item active" id="subtab-btn-pipeline" onclick="switchConveyorSubTab('pipeline')">
+            <span>🔄 7 Bosqichli Konveyer Oqimi</span>
+          </button>
+          <button class="pill-item" id="subtab-btn-bom" onclick="switchConveyorSubTab('bom')">
+            <span>📋 Mahsulot BoM (Retseptlari)</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="conveyor-pipeline-view">
+        <div class="conveyor-layout">
+          <aside class="roll-sidebar-card">
+            <div class="roll-sidebar-header">
+              <div class="roll-sidebar-title">
+                <span>🧵</span>
+                <span>Rulonlar Monitoringi</span>
+              </div>
+              <span class="pill-badge" id="roll-count-badge" style="background:var(--primary-blue); color:white;">0 ta</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+              Qaysi rulon qaysi stolda turgani va nechta ro'molga aylangani:
+            </div>
+            <div class="roll-list-stack" id="roll-tracker-list"></div>
+          </aside>
+
+          <div style="display: flex; flex-direction: column; gap: 14px; min-width: 0;">
+            <div style="background:#ffffff; border-radius:16px; padding:12px 18px; border:1px solid var(--border-subtle); display:flex; align-items:center; justify-content:space-between; font-size:12.5px; overflow-x:auto; gap:10px;">
+              <span><b>Texnologik zanjir:</b></span>
+              <span style="color:#2563eb;">1. Bichuv</span> ➔ 
+              <span style="color:#3b82f6;">2. Donalash (3 ta)</span> ➔ 
+              <span style="color:#6366f1;">3. Tikish</span> ➔ 
+              <span style="color:#ec4899;">4. Tosh bosish</span> ➔ 
+              <span style="color:#f59e0b;">5. Dazmol</span> ➔ 
+              <span style="color:#8b5cf6;">6. Etiketka</span> ➔ 
+              <span style="color:#10b981;">7. Salafan & Ombor</span>
+            </div>
+            <div class="pipeline-7-board" id="pipeline-7-board"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="conveyor-bom-view" style="display: none;">
+        <div class="table-container-card">
+          <div class="table-header-bar">
+            <div>
+              <div class="table-title">Mahsulot BoM (Bill of Materials) Retseptlari</div>
+              <div style="font-size: 13px; color: var(--text-muted); margin-top: 3px;">
+                1 metr rulondan chiqish koeffitsiyenti (1m = 3 dona), tosh, ip, etiketka va salafan sarf me'yorlari
+              </div>
+            </div>
+            <button class="pill-action-btn btn-primary" onclick="openBOMModal()">
+              <span>➕ Yangi BoM Kiritish</span>
+            </button>
+          </div>
+          <div class="bom-grid" id="bom-cards-grid"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- 3. XOMASHYO OMBORI TABI                                  -->
+    <!-- ======================================================== -->
+    <div id="tab-content-raw_materials" style="display: none;">
+      <div class="overview-header">
+        <div class="header-title-box">
+          <h1>Xomashyo Ombori va Xaridlar</h1>
+          <p>Keng rulon matolar, bezak toshlari, tikuv iplari, etiketka va salafan qoldiqlari</p>
+        </div>
+        <div class="header-actions">
+          <button class="pill-action-btn" onclick="openNewRawMaterialModal()"><span>➕ Yangi Xomashyo Turi</span></button>
+          <button class="pill-action-btn btn-primary" onclick="openRawInboundModal()"><span>📥 + Xomashyo Kirimi</span></button>
+        </div>
+      </div>
+
+      <div class="kpi-cards-grid">
+        <div class="kpi-stat-card hero-blue">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Rulon Matolar Zaxirasi</span>
+            <div class="kpi-icon-circle">🧵</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="raw-kpi-fabrics">0 m</span>
+              <span class="kpi-pill-badge badge-white">0 metr</span>
+            </div>
+            <div class="kpi-bottom-subtext">Ombordagi rulon matolar</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Bezak Toshlari (Biser)</span>
+            <div class="kpi-icon-circle blue-soft">✨</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="raw-kpi-stones">0 dona</span>
+              <span class="kpi-pill-badge badge-blue">0 dona</span>
+            </div>
+            <div class="kpi-bottom-subtext">Termopress uchun toshlar</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Tikuv Iplari Zaxirasi</span>
+            <div class="kpi-icon-circle blue-soft">🧵</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="raw-kpi-threads">0 bobina</span>
+              <span class="kpi-pill-badge badge-blue">0 bobina</span>
+            </div>
+            <div class="kpi-bottom-subtext">Overlog va tikuv iplari</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Etiketka & Salafan Paket</span>
+            <div class="kpi-icon-circle blue-soft">🏷️</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="raw-kpi-packaging">0 dona</span>
+              <span class="kpi-pill-badge badge-blue">0 dona</span>
+            </div>
+            <div class="kpi-bottom-subtext">Qadoqlash vositalari</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container-card" style="margin-top: 18px;">
+        <div class="table-header-bar">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="pill-action-btn raw-filter-btn active" data-filter="all" onclick="setRawFilter('all')">Barchasi</button>
+            <button class="pill-action-btn raw-filter-btn" data-filter="fabric" onclick="setRawFilter('fabric')">🧵 Rulon Matolar</button>
+            <button class="pill-action-btn raw-filter-btn" data-filter="accessory" onclick="setRawFilter('accessory')">✨ Toshlar & Iplar</button>
+            <button class="pill-action-btn raw-filter-btn" data-filter="packaging" onclick="setRawFilter('packaging')">📦 Qadoq & Etiketka</button>
+          </div>
+
+          <div class="table-actions-right">
+            <div class="search-pill">
+              <span>🔍</span>
+              <input type="text" placeholder="Xomashyoni qidirish..." oninput="handleSearch(this.value)">
+              <span class="kbd-badge">Ctrl K</span>
+            </div>
+            <button class="pill-action-btn btn-primary" onclick="openRawInboundModal()">+ Kirim Qilish</button>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th>Xomashyo Nomi</th>
+                <th>Toifasi</th>
+                <th>Ombordagi Astatka</th>
+                <th>1 Metrdan Chiqish</th>
+                <th>Holati</th>
+                <th>Birlik Narxi</th>
+                <th>Oxirgi Yangilanish</th>
+                <th>Amal</th>
+              </tr>
+            </thead>
+            <tbody id="raw-materials-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- 4. TAYYOR MAHSULOTLAR TABI                              -->
+    <!-- ======================================================== -->
+    <div id="tab-content-finished_goods" style="display: none;">
+      <div class="overview-header">
+        <div class="header-title-box">
+          <h1>Tayyor Mahsulotlar Ombori va Sotuv</h1>
+          <p>Sotuvga tayyor bo'lgan donali ro'mollar qoldig'i (astatka), tannarx va chiqim amallari</p>
+        </div>
+        <div class="header-actions">
+          <button class="pill-action-btn" onclick="exportFinishedGoodsCSV()"><span>📑 Astatka Vedomosti (CSV)</span></button>
+          <button class="pill-action-btn btn-primary" onclick="openSaleModal(state.finishedGoods[0]?.id)"><span>📤 + Do'konga / Xaridorga Sotuv</span></button>
+        </div>
+      </div>
+
+      <div class="kpi-cards-grid">
+        <div class="kpi-stat-card hero-blue">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Jami Tayyor Ro'mollar</span>
+            <div class="kpi-icon-circle">🧣</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="fg-kpi-stock">0 dona</span>
+              <span class="kpi-pill-badge badge-white">0 dona</span>
+            </div>
+            <div class="kpi-bottom-subtext">Barcha modellar bo'yicha</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Ombordagi Tovarlar Qiymati</span>
+            <div class="kpi-icon-circle blue-soft">💰</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="fg-kpi-value">0 so'm</span>
+              <span class="kpi-pill-badge badge-blue">Ulgurji narxda</span>
+            </div>
+            <div class="kpi-bottom-subtext">Tannarxi: 0 so'm</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Eng Ko'p Qolgan Model</span>
+            <div class="kpi-icon-circle blue-soft">🏆</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" style="font-size:24px;" id="fg-kpi-topmodel">—</span>
+              <span class="kpi-pill-badge badge-blue">0 dona</span>
+            </div>
+            <div class="kpi-bottom-subtext">Omborda mahsulot yo'q</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Bugungi Chiqim (Sotuv)</span>
+            <div class="kpi-icon-circle blue-soft" style="background:#ecfdf5; color:#059669;">🚚</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="fg-kpi-sales">0 dona</span>
+              <span class="kpi-pill-badge badge-blue" style="background:#ecfdf5; color:#059669;">0 dona</span>
+            </div>
+            <div class="kpi-bottom-subtext">Yetkazilgan tovarlar</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container-card" style="margin-top: 18px;">
+        <div class="table-header-bar">
+          <div class="table-title">Tayyor Donali Ro'mollar Ro'yxati</div>
+          <div class="table-actions-right">
+            <div class="search-pill">
+              <span>🔍</span>
+              <input type="text" placeholder="Model yoki SKU qidirish..." oninput="handleSearch(this.value)">
+              <span class="kbd-badge">Ctrl K</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th>Artikul (SKU)</th>
+                <th>Ro'mol Modeli</th>
+                <th>O'lcham</th>
+                <th>Rangi & Bezagi</th>
+                <th>Ombordagi Astatka</th>
+                <th>Sotuv Narxi</th>
+                <th>Tannarxi</th>
+                <th>Amal</th>
+              </tr>
+            </thead>
+            <tbody id="finished-goods-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- 4.5. MIJOZLAR & OLDI-BERDI (NASIYA VA TO'LOVLAR)          -->
+    <!-- ======================================================== -->
+    <div id="tab-content-clients" style="display: none;">
+      <div class="overview-header">
+        <div class="header-title-box">
+          <h1>Mijozlar Boshqaruvi va Oldi-Berdi (Nasiya & To'lovlar)</h1>
+          <p>Ulgurji xaridorlar va do'konlar bilan o'zaro hisob-kitoblar, nasiya qoldiqlari va akt-sverka</p>
+        </div>
+        <div class="header-actions">
+          <button class="pill-action-btn" onclick="exportClientsCSV()"><span>📑 Sverka Ro'yxati (CSV)</span></button>
+          <button class="pill-action-btn" onclick="openClientPaymentModal()"><span>💵 + To'lov Qabul Qilish</span></button>
+          <button class="pill-action-btn btn-primary" onclick="openNewClientModal()"><span>➕ Yangi Mijoz</span></button>
+        </div>
+      </div>
+
+      <!-- 4 ta KPI kartasi -->
+      <div class="kpi-cards-grid">
+        <div class="kpi-stat-card hero-amber">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Mijozlardagi Nasiyamiz (Haqqimiz)</span>
+            <div class="kpi-icon-circle">⏳</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="client-kpi-debt">0 so'm</span>
+              <span class="kpi-pill-badge badge-white" id="client-kpi-debt-count">0 ta do'kon</span>
+            </div>
+            <div class="kpi-bottom-subtext" id="client-kpi-debt-sub">Kutilayotgan to'lovlar</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card hero-green">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Jami Qabul Qilingan To'lovlar</span>
+            <div class="kpi-icon-circle">💵</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="client-kpi-paid">0 so'm</span>
+              <span class="kpi-pill-badge badge-white">Kirim bo'ldi</span>
+            </div>
+            <div class="kpi-bottom-subtext">Kassa va hisobraqamga tushgan</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Jami Hamkor Mijozlar</span>
+            <div class="kpi-icon-circle blue-soft">🏬</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="client-kpi-count">0 ta</span>
+              <span class="kpi-pill-badge badge-blue">Faol</span>
+            </div>
+            <div class="kpi-bottom-subtext" id="client-kpi-count-sub">Do'kon va savdo nuqtalari</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Eng Katta Xaridor (Top)</span>
+            <div class="kpi-icon-circle blue-soft" style="background:#eff6ff; color:#1e60ff;">⭐</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="client-kpi-top" style="font-size:18px; font-weight:700;">-</span>
+            </div>
+            <div class="kpi-bottom-subtext" id="client-kpi-top-sub">Jami xarid hajmi</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jadval kartasi -->
+      <div class="table-container-card" style="margin-top: 18px;">
+        <div class="table-header-bar">
+          <div class="table-title">Mijozlar Ro'yxati va Joriy Balanslar</div>
+          <div class="table-actions-right">
+            <div class="pill-group" style="display:inline-flex; gap:6px; margin-right:12px;">
+              <button class="pill-action-btn active" id="filter-client-all" onclick="setClientFilter('all')">Hammasi</button>
+              <button class="pill-action-btn" id="filter-client-debtors" onclick="setClientFilter('debtors')">⚠️ Qarzdorlar</button>
+              <button class="pill-action-btn" id="filter-client-cleared" onclick="setClientFilter('cleared')">✓ Hisob toza</button>
+            </div>
+            <div class="search-pill">
+              <span>🔍</span>
+              <input type="text" placeholder="Do'kon nomi yoki telefon..." oninput="handleClientSearch(this.value)">
+              <span class="kbd-badge">Ctrl K</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th>Mijoz / Do'kon Nomi</th>
+                <th>Mas'ul Shaxs & Telefon</th>
+                <th>Manzili</th>
+                <th>Jami Xarid</th>
+                <th>To'langan</th>
+                <th>Joriy Qarz (Haqqimiz)</th>
+                <th>Oxirgi Harakat</th>
+                <th>Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="clients-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- 5. MOLIYA & TANNARX (BIZNES EGASI UCHUN ASOSIY P&L)       -->
+    <!-- ======================================================== -->
+    <div id="tab-content-finance" style="display: none;">
+      <div class="overview-header">
+        <div class="header-title-box">
+          <h1>Moliya, Tannarx va Foyda/Zarar (P&L Tahlili)</h1>
+          <p>Bitta ro'mol tannarxi, sof foyda marjasi, seh xarajatlari va biznes egasining daromadi</p>
+        </div>
+        <div class="header-actions">
+          <button class="pill-action-btn" onclick="exportFinanceReportCSV()"><span>📑 Moliyaviy Hisobot (CSV)</span></button>
+          <button class="pill-action-btn btn-primary" onclick="window.print()"><span>🖨️ Hisobotni Chop Etish</span></button>
+        </div>
+      </div>
+
+      <!-- Biznes egasi uchun 4 ta asosiy Moliya KPI kartasi -->
+      <div class="kpi-cards-grid">
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Oylik Jami Tushum (Sotuv)</span>
+            <div class="kpi-icon-circle blue-soft">💵</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="fin-kpi-revenue">0 so'm</span>
+              <span class="kpi-pill-badge badge-blue">0%</span>
+            </div>
+            <div class="kpi-bottom-subtext">0 dona ro'mol sotuvidan</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Jami Seh Xarajatlari</span>
+            <div class="kpi-icon-circle blue-soft" style="background:#fef2f2; color:#ef4444;">📉</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="fin-kpi-expenses">0 so'm</span>
+              <span class="kpi-pill-badge" style="background:#fee2e2; color:#b91c1c;">Tannarx + Oylik</span>
+            </div>
+            <div class="kpi-bottom-subtext">Xomashyo, maosh, ijara va elektr</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card hero-green">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Oylik SOF FOYDA (Net Profit)</span>
+            <div class="kpi-icon-circle">💰</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="fin-kpi-profit">0 so'm</span>
+              <span class="kpi-pill-badge badge-white">0 so'm</span>
+            </div>
+            <div class="kpi-bottom-subtext">Barcha xarajatlar to'langandan so'ng</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Sof Rentabellik (Marja)</span>
+            <div class="kpi-icon-circle blue-soft" style="background:#ecfdf5; color:#059669;">📊</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="fin-kpi-margin">0%</span>
+              <span class="kpi-pill-badge badge-blue" style="background:#ecfdf5; color:#059669;">0%</span>
+            </div>
+            <div class="kpi-bottom-subtext">Sof foyda marjasi</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 ustunli moliyaviy blok: UNIT ECONOMICS & P&L STATEMENT -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; margin-bottom: 20px;">
+        
+        <!-- Chap: 1 dona Ro'mol Tannarxi Pasporti -->
+        <div class="dashboard-box">
+          <div class="box-header">
+            <div>
+              <div class="box-title">1 Dona Ro'mol Tannarxi Pasporti (Unit Economics)</div>
+              <div class="box-subtitle">Xomashyo sarfi, usta haqi va 1 donadan qolayotgan sof foyda</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label class="form-label">Ro'mol Modelini Tanlang:</label>
+            <select id="finance-model-select" class="form-control" onchange="onFinanceModelChange()">
+              <!-- JS orqali to'ldiriladi -->
+            </select>
+          </div>
+
+          <!-- Katta foyda kartasi -->
+          <div class="profit-callout-card" id="finance-profit-callout">
+            <!-- JS hisoblaydi -->
+          </div>
+
+          <!-- Moddiy xarajatlar tarkibi -->
+          <div style="font-size: 13.5px; font-weight: 700; color: var(--text-title); margin-top: 16px; margin-bottom: 8px;">
+            1 dona ro'mol tannarxi tarkibi (Qayerga qancha pul ketyapti):
+          </div>
+
+          <div class="cost-breakdown-stack" id="finance-cost-breakdown">
+            <!-- JS hisoblaydi -->
+          </div>
+        </div>
+
+        <!-- O'ng: Foyda va Zarar (P&L Hisoboti) Jadvali -->
+        <div class="dashboard-box">
+          <div class="box-header">
+            <div>
+              <div class="box-title">Foyda va Zarar (P&L) Balansi</div>
+              <div class="box-subtitle">Sehning joriy oylik tushumi va xarajatlari balansi</div>
+            </div>
+            <span class="pill-badge" style="background:#ecfdf5; color:#059669; font-weight:700;">Sentabr 2026</span>
+          </div>
+
+          <table class="pnl-table">
+            <tbody>
+              <tr>
+                <td><strong>1. JAMI SOTUV TUSHUMI (Gross Revenue)</strong><div style="font-size:12px; color:#64748b;">Sotilgan ro'mollar tushumi</div></td>
+                <td style="text-align:right; font-weight:800; color:#1e60ff; font-size:15px;" id="pnl-row-revenue">0 so'm</td>
+              </tr>
+              <tr>
+                <td><strong>2. Xomashyo xarajatlari (Mato, tosh, iplar)</strong><div style="font-size:12px; color:#64748b;">Sarf qilingan xomashyolar qiymati</div></td>
+                <td style="text-align:right; font-weight:700; color:#ef4444;" id="pnl-row-raw">-0 so'm</td>
+              </tr>
+              <tr>
+                <td><strong>3. Ustalarga to'langan ish haqi (Labor)</strong><div style="font-size:12px; color:#64748b;">Bichuvchi, tikuvchi, tosh bosuvchi, dazmolchilar</div></td>
+                <td style="text-align:right; font-weight:700; color:#ef4444;" id="pnl-row-labor">-0 so'm</td>
+              </tr>
+              <tr>
+                <td><strong>4. Doimiy seh xarajatlari (Overhead)</strong><div style="font-size:12px; color:#64748b;">Seh ijarasi, elektr energiya, uskunalar amortizatsiyasi</div></td>
+                <td style="text-align:right; font-weight:700; color:#ef4444;" id="pnl-row-overhead">-0 so'm</td>
+              </tr>
+              <tr class="pnl-total-row">
+                <td><strong style="font-size:16px; color:#059669;">5. BIZNES EGASIGA QOLGAN SOF FOYDA (Net Profit)</strong><div style="font-size:12px; color:#059669;">Barcha xarajatlar chiqarib tashlangach</div></td>
+                <td style="text-align:right; font-weight:800; color:#059669; font-size:18px;" id="pnl-row-profit">0 so'm</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Ombordagi Muzlab Turgan Kapital -->
+          <div style="background:#f8fafc; border-radius:14px; padding:16px; margin-top:20px; border:1px solid #e2e8f0;">
+            <div style="font-size:13.5px; font-weight:700; color:var(--text-title); margin-bottom:8px;">
+              💼 Ombordagi Aylanma Kapital (Muzlab turgan pul):
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; color:#64748b; margin-bottom:4px;">
+              <span>Xomashyo omboridagi pul qiymati:</span>
+              <strong style="color:#0f172a;" id="fin-capital-raw">0 so'm</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; color:#64748b; margin-bottom:6px;">
+              <span>Tayyor ro'mollar omboridagi pul qiymati:</span>
+              <strong style="color:#0f172a;" id="fin-capital-fg">0 so'm</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:800; color:var(--primary-blue); border-top:1px dashed #cbd5e1; padding-top:6px;">
+              <span>Jami zaxiradagi kapital:</span>
+              <span id="fin-capital-total">0 so'm</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- 6. HARAKATLAR TARIXI TABI                                -->
+    <!-- ======================================================== -->
+    <div id="tab-content-history" style="display: none;">
+      <div class="overview-header">
+        <div class="header-title-box">
+          <h1>Seh Harakatlari Tarixi va Audit Jurnali</h1>
+          <p>Kirim, chiqim, partiyalar boshlanishi va bosqichlar siljishi to'liq qaydnomasi</p>
+        </div>
+        <div class="header-actions">
+          <button class="pill-action-btn" onclick="exportHistoryCSV()"><span>📑 Tarixni Yuklab Olish (CSV)</span></button>
+        </div>
+      </div>
+
+      <div class="kpi-cards-grid">
+        <div class="kpi-stat-card hero-blue">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Jami Qaydlar</span>
+            <div class="kpi-icon-circle">📜</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="hist-kpi-total">0 ta amal</span>
+              <span class="kpi-pill-badge badge-white">Tizimda</span>
+            </div>
+            <div class="kpi-bottom-subtext">Barcha harakatlar hisobi</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Ishga Tushgan Partiyalar</span>
+            <div class="kpi-icon-circle blue-soft">⚡</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="hist-kpi-batches">0 ta partiya</span>
+              <span class="kpi-pill-badge badge-blue">Faol</span>
+            </div>
+            <div class="kpi-bottom-subtext">Bichuvdan boshlab</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Xomashyo Kirimlari</span>
+            <div class="kpi-icon-circle blue-soft">📥</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="hist-kpi-raw">0 ta kirim</span>
+              <span class="kpi-pill-badge badge-blue">Qabul qilingan</span>
+            </div>
+            <div class="kpi-bottom-subtext">Rulon va furnituralar</div>
+          </div>
+        </div>
+
+        <div class="kpi-stat-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Tovarlar Chiqimi (Sotuv)</span>
+            <div class="kpi-icon-circle blue-soft" style="background:#ecfdf5; color:#059669;">📤</div>
+          </div>
+          <div>
+            <div class="kpi-number-row">
+              <span class="kpi-big-number" id="hist-kpi-sales">0 ta chiqim</span>
+              <span class="kpi-pill-badge badge-blue" style="background:#ecfdf5; color:#059669;">Sotildi</span>
+            </div>
+            <div class="kpi-bottom-subtext">Mijozlarga yetkazilgan</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container-card" style="margin-top: 18px;">
+        <div class="table-header-bar">
+          <div class="table-title">Harakatlar Qaydnomasi</div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th>Sana va Vaqt</th>
+                <th>Amal Turi</th>
+                <th>Tafsilot</th>
+                <th>Mas'ul Shaxs</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div> <!-- #tab-content-history ends -->
+
+  </div> <!-- .main-content-area ends -->
+</div> <!-- .main-viewport ends -->
+</div> <!-- .app-layout ends -->
+
+
+  <!-- ======================================================== -->
+  <!-- MODALLAR                                                 -->
+  <!-- ======================================================== -->
+  <div class="modal-overlay" id="modal-new-batch">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">⚡ Yangi Ishlab Chiqarish Partiyasi (Bichuv)</div>
+        <button class="btn-close-modal" onclick="closeModal('modal-new-batch')">&times;</button>
+      </div>
+      <form onsubmit="submitNewBatch(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Mahsulot BoM Retseptini Tanlang:</label>
+            <select id="batch-bom-select" class="form-control" onchange="onBatchBOMChange()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Partiya / Model Nomi:</label>
+            <input type="text" id="batch-name" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ro'mol O'lchami:</label>
+            <input type="text" id="batch-size" class="form-control" value="100x100 sm" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rulon Nomeri (Partiya markirovkasi):</label>
+            <input type="text" id="batch-roll-number" class="form-control" placeholder="Masalan: RULON-#SHIF-455" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ishlab chiqariladigan ro'mol soni (Dona):</label>
+            <input type="number" id="batch-quantity" class="form-control" min="3" step="1" placeholder="Dona sonini kiriting (masalan: 120)" oninput="calculateBatchNeeds()" required>
+          </div>
+          <div class="calc-box" id="batch-calc-info"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-action-btn" onclick="closeModal('modal-new-batch')">Bekor qilish</button>
+          <button type="submit" class="pill-action-btn btn-primary">Bichuvga Yuborish ➔</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-bom">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title" id="bom-modal-title">📋 Mahsulot BoM Retsepti</div>
+        <button class="btn-close-modal" onclick="closeModal('modal-bom')">&times;</button>
+      </div>
+      <form onsubmit="saveBOM(event)">
+        <input type="hidden" id="bom-edit-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Ro'mol Modeli Nomi:</label>
+            <input type="text" id="bom-name" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">O'lchami:</label>
+            <select id="bom-size" class="form-control">
+              <option value="90x90 sm">90x90 sm</option>
+              <option value="95x95 sm">95x95 sm</option>
+              <option value="100x100 sm" selected>100x100 sm</option>
+              <option value="110x110 sm">110x110 sm</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Asosiy Rulon Mato:</label>
+            <select id="bom-fabric-select" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">1 metr rulondan chiqish soni (Koeffitsiyent):</label>
+            <input type="number" id="bom-yield" class="form-control" value="3" min="1" max="10" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bezak / Tosh Turi:</label>
+            <select id="bom-stone-select" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">1 ta ro'molga tosh soni (Dona):</label>
+            <input type="number" id="bom-stones-count" class="form-control" value="25" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Izoh / Texnologik karta:</label>
+            <input type="text" id="bom-notes" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-action-btn" onclick="closeModal('modal-bom')">Bekor qilish</button>
+          <button type="submit" class="pill-action-btn btn-primary">BoM Retseptini Saqlash ✓</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-raw-inbound">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">📥 Xomashyo Kirimi Qilish</div>
+        <button class="btn-close-modal" onclick="closeModal('modal-raw-inbound')">&times;</button>
+      </div>
+      <form onsubmit="submitRawInbound(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Xomashyo turi:</label>
+            <select id="inbound-raw-select" class="form-control" onchange="onInboundRawChange()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kirim miqdori (Metr / Dona / Bobina):</label>
+            <input type="number" id="inbound-quantity" class="form-control" step="any" min="0.1" placeholder="Miqdori (masalan: 100)" oninput="calculateInboundAverage()" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Yangi kirim narxi (1 birlik xarid narxi, so'mda):</label>
+            <input type="number" id="inbound-price" class="form-control" step="any" min="0" placeholder="Kirim narxi (so'm)" oninput="calculateInboundAverage()" required>
+          </div>
+          <div id="inbound-calc-info" style="font-size:12.5px; line-height:1.5; color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; margin-top:8px; display:none;">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-action-btn" onclick="closeModal('modal-raw-inbound')">Bekor qilish</button>
+          <button type="submit" class="pill-action-btn btn-primary">Omborga Kirim Qilish ✓</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-new-raw-type">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">➕ Yangi Xomashyo Turi Qo'shish</div>
+        <button class="btn-close-modal" onclick="closeModal('modal-new-raw-type')">&times;</button>
+      </div>
+      <form onsubmit="submitNewRawType(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Xomashyo Nomi:</label>
+            <input type="text" id="newraw-name" class="form-control" placeholder="Masalan: Shifon 'Zumrad' rulon" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Toifasi:</label>
+            <select id="newraw-category" class="form-control">
+              <option value="fabric">🧵 Rulon Mato (metrda)</option>
+              <option value="accessory">✨ Furnitura / Tosh / Ip</option>
+              <option value="packaging">📦 Qadoqlash / Etiketka</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">O'lchov birligi:</label>
+            <select id="newraw-unit" class="form-control">
+              <option value="metr">metr</option>
+              <option value="dona">dona</option>
+              <option value="bobina">bobina</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dastlabki Qoldiq (Zaxira):</label>
+            <input type="number" id="newraw-stock" class="form-control" min="0" placeholder="Masalan: 500" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Minimal Chegara (Ogohlantirish uchun):</label>
+            <input type="number" id="newraw-min" class="form-control" min="0" placeholder="Masalan: 50" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Birlik Narxi (so'm):</label>
+            <input type="number" id="newraw-price" class="form-control" min="0" placeholder="Masalan: 22000" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-action-btn" onclick="closeModal('modal-new-raw-type')">Bekor qilish</button>
+          <button type="submit" class="pill-action-btn btn-primary">Xomashyoni Saqlash ✓</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-sale">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">📤 Tayyor Ro'mol Chiqimi (Sotuv & Nasiya)</div>
+        <button class="btn-close-modal" onclick="closeModal('modal-sale')">&times;</button>
+      </div>
+      <form onsubmit="submitSale(event)">
+        <input type="hidden" id="sale-goods-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Tanlangan Ro'mol:</label>
+            <div id="sale-goods-name" style="font-weight: 700; font-size: 15px; color: var(--text-title);"></div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+              Mavjud astatka: <strong id="sale-goods-stock" style="color: var(--primary-blue);"></strong> | Birlik narxi: <strong id="sale-goods-price" style="color: #059669;"></strong>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Chiqim miqdori (Dona):</label>
+            <input type="number" id="sale-quantity" class="form-control" min="1" oninput="calculateSaleTotal()" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mijoz / Do'konni tanlang:</label>
+            <select id="sale-client-select" class="form-control" onchange="onSaleClientChange()">
+              <!-- JS orqali to'ldiriladi -->
+            </select>
+          </div>
+
+          <div class="form-group" id="sale-custom-client-group" style="display:none;">
+            <label class="form-label">Yangi mijoz / do'kon nomi:</label>
+            <input type="text" id="sale-custom-client" class="form-control" placeholder="Masalan: 'Chorsu' 5-do'kon">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">To'lov shakli:</label>
+            <select id="sale-payment-type" class="form-control" onchange="onSalePaymentTypeChange()">
+              <option value="full_cash">💵 Naqd / Karta (To'liq to'landi)</option>
+              <option value="debt">⏳ Nasiya / Qarzga (To'lanmadi)</option>
+              <option value="partial">⚖️ Qisman to'lov (Oldindan berildi, qolgani nasiya)</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="sale-partial-amount-group" style="display:none;">
+            <label class="form-label">Oldindan to'langan summa (so'm):</label>
+            <input type="number" id="sale-paid-amount" class="form-control" min="0" placeholder="To'langan qismini kiriting" oninput="calculateSaleTotal()">
+          </div>
+
+          <div class="calc-box" id="sale-calc-box">
+            <!-- JS hisoblaydi -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-action-btn" onclick="closeModal('modal-sale')">Bekor qilish</button>
+          <button type="submit" class="pill-action-btn btn-primary">Chiqim Qilish ✓</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Yangi mijoz qo'shish -->
+  <div class="modal-overlay" id="modal-new-client">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">➕ Yangi Mijoz / Hamkor Qo'shish</div>
+        <button class="btn-close-modal" onclick="closeModal('modal-new-client')">&times;</button>
+      </div>
+      <form onsubmit="submitNewClient(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Do'kon / Savdo nuqtasi nomi:</label>
+            <input type="text" id="newcli-name" class="form-control" placeholder="Masalan: «Gulbahor Butik»" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mas'ul shaxs (Ism-familiya):</label>
+            <input type="text" id="newcli-person" class="form-control" placeholder="Masalan: Gulbahor opa">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefon raqam:</label>
+            <input type="text" id="newcli-phone" class="form-control" placeholder="+998 90 123-45-67">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Manzil / Bozor joylashuvi:</label>
+            <input type="text" id="newcli-address" class="form-control" placeholder="Masalan: Chorsu bozori, 4-qator 12-do'kon">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Boshlang'ich qarz balansi (agar avvaldan qarzi bo'lsa, so'mda):</label>
+            <input type="number" id="newcli-initial-debt" class="form-control" min="0" value="0" placeholder="0">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-action-btn" onclick="closeModal('modal-new-client')">Bekor qilish</button>
+          <button type="submit" class="pill-action-btn btn-primary">Mijozni Saqlash ✓</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Mijozdan to'lov qabul qilish -->
+  <div class="modal-overlay" id="modal-client-payment">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">💵 Mijozdan To'lov Qabul Qilish</div>
+        <button class="btn-close-modal" onclick="closeModal('modal-client-payment')">&times;</button>
+      </div>
+      <form onsubmit="submitClientPayment(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Mijoz / Do'konni tanlang:</label>
+            <select id="pay-client-select" class="form-control" onchange="onPaymentClientSelectChange()" required>
+              <!-- JS orqali to'ldiriladi -->
+            </select>
+          </div>
+          <div id="pay-client-info" style="font-size:13px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; margin-bottom:14px; color:#1e40af;">
+          </div>
+          <div class="form-group">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label class="form-label" style="margin-bottom:0;">Qabul qilinayotgan summa (so'm):</label>
+              <button type="button" class="quick-chip-btn" id="btn-quick-full-debt" onclick="fillFullDebt()" style="display:none;">To'liq qarzni kiritish ⚡</button>
+            </div>
+            <input type="number" id="pay-amount" class="form-control" min="1" step="any" placeholder="Masalan: 2500000" oninput="onPayAmountInput()" required>
+            <div id="pay-amount-live-text" style="font-size:12px; color:#059669; font-weight:600; margin-top:4px; display:none;"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">To'lov shakli:</label>
+            <select id="pay-method" class="form-control">
+              <option value="Naqd pul">💵 Naqd pul</option>
+              <option value="Karta orqali (Click / Payme)">💳 Plastik karta (Click / Payme)</option>
+              <option value="Perechisleniye (Bank o'tkazmasi)">🏛️ Perechisleniye (Bank o'tkazmasi)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Izoh / Kvitansiya raqami:</label>
+            <input type="text" id="pay-notes" class="form-control" placeholder="Masalan: Qarz yopish uchun to'lov">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-action-btn" onclick="closeModal('modal-client-payment')">Bekor qilish</button>
+          <button type="submit" class="pill-action-btn btn-primary" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">To'lovni Qabul Qilish ✓</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Akt-Sverka (O'zaro hisob-kitob solishtirma dalolatnomasi) -->
+  <div class="modal-overlay" id="modal-client-statement">
+    <div class="modal-box modal-box-lg">
+      <div class="modal-header">
+        <div class="modal-title">📑 O'zaro Hisob-Kitob Solishtirma Dalolatnomasi (Akt-Sverka)</div>
+        <button class="btn-close-modal" onclick="closeModal('modal-client-statement')">&times;</button>
+      </div>
+      <div class="modal-body" id="client-statement-content">
+        <!-- JS orqali to'ldiriladi -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="pill-action-btn" onclick="exportStatementCSV()"><span>📥 CSV Ko'chirish</span></button>
+        <button type="button" class="pill-action-btn" onclick="printClientStatement()"><span>🖨️ Chop Etish</span></button>
+        <button type="button" class="pill-action-btn btn-primary" onclick="closeModal('modal-client-statement')">Yopish</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/tekstil_dashboard/static/src/html/js/data.js"></script>
+  <script src="/tekstil_dashboard/static/src/html/js/app.js"></script>
+</body>
+</html>
