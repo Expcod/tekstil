@@ -209,34 +209,50 @@ class TekstilDashboardService(models.AbstractModel):
         }
 
     @api.model
-    def tablet_submit_output(self, employee_id, batch_id, operation_name, quantity, department="sewing", piece_rate=1500.0):
+    def tablet_submit_output(self, employee_id=None, batch_id=None, operation_name="", quantity=0.0, department="sewing", piece_rate=1500.0, **kwargs):
         """Planshetdan xodim natijasini saqlash"""
+        emp_id = employee_id or kwargs.get("employee_id")
+        b_id = batch_id or kwargs.get("batch_id")
+        op_name = operation_name or kwargs.get("operation_name", "Operatsiya")
+        qty = quantity or kwargs.get("quantity", 0.0)
+        dept = department or kwargs.get("department", "sewing")
+        rate = piece_rate or kwargs.get("piece_rate", 1500.0)
+
         return self.env["tekstil.worker.output"].register_tablet_output(
-            employee_id=employee_id,
-            batch_id=batch_id,
-            operation_name=operation_name,
-            quantity=quantity,
-            department=department,
-            piece_rate=piece_rate,
+            employee_id=emp_id,
+            batch_id=b_id,
+            operation_name=op_name,
+            quantity=qty,
+            department=dept,
+            piece_rate=rate,
         )
 
     @api.model
-    def qc_submit_check(self, batch_id, inspected_qty, grade_1_qty, grade_2_qty, rework_qty, reject_qty, defect_type_ids=None, note=""):
+    def qc_submit_check(self, batch_id=None, inspected_qty=0.0, grade_1_qty=0.0, grade_2_qty=0.0, rework_qty=0.0, reject_qty=0.0, defect_type_ids=None, note="", **kwargs):
         """OTK Sifat nazoratini tezkor kiritish"""
-        batch = self.env["tekstil.production.batch"].browse(batch_id)
+        b_id = batch_id or kwargs.get("batch_id")
+        insp_qty = inspected_qty or kwargs.get("inspected_qty", 0.0)
+        g1_qty = grade_1_qty or kwargs.get("grade_1_qty", 0.0)
+        g2_qty = grade_2_qty or kwargs.get("grade_2_qty", 0.0)
+        rew_qty = rework_qty or kwargs.get("rework_qty", 0.0)
+        rej_qty = reject_qty or kwargs.get("reject_qty", 0.0)
+        def_ids = defect_type_ids if defect_type_ids is not None else kwargs.get("defect_type_ids", [])
+        qc_note = note or kwargs.get("note", "")
+
+        batch = self.env["tekstil.production.batch"].browse(b_id)
         if not batch.exists():
             raise UserError(_("Partiya topilmadi!"))
 
         qc = self.env["tekstil.quality.check"].create({
-            "batch_id": batch_id,
-            "inspected_qty": inspected_qty,
-            "grade_1_qty": grade_1_qty,
-            "grade_2_qty": grade_2_qty,
-            "rework_qty": rework_qty,
-            "reject_qty": reject_qty,
-            "defect_type_ids": [(6, 0, defect_type_ids or [])],
-            "defect_note": note,
-            "state": "passed" if grade_1_qty >= (inspected_qty * 0.9) else "rework",
+            "batch_id": b_id,
+            "inspected_qty": insp_qty,
+            "grade_1_qty": g1_qty,
+            "grade_2_qty": g2_qty,
+            "rework_qty": rew_qty,
+            "reject_qty": rej_qty,
+            "defect_type_ids": [(6, 0, def_ids or [])],
+            "defect_note": qc_note,
+            "state": "passed" if g1_qty >= (insp_qty * 0.9) else "rework",
         })
         qc.action_pass() if qc.state == "passed" else qc.action_rework()
 
@@ -248,10 +264,14 @@ class TekstilDashboardService(models.AbstractModel):
         }
 
     @api.model
-    def batch_move_next_stage(self, batch_id):
+    def batch_move_next_stage(self, batch_id=None, *args, **kwargs):
         """Partiyani konveyer bo'yicha keyingi bosqichga o'tkazish"""
-        batch = self.env["tekstil.production.batch"].browse(batch_id)
+        bid = batch_id or (args[0] if args else None) or kwargs.get("batch_id")
+        if not bid:
+            raise UserError(_("Partiya identifikatori ko'rsatilmadi!"))
+        batch = self.env["tekstil.production.batch"].browse(bid)
         if not batch.exists():
             raise UserError(_("Partiya topilmadi!"))
         batch.action_next_stage()
         return {"success": True, "new_stage": batch.stage}
+
