@@ -369,42 +369,90 @@ class TekstilDashboardData(models.AbstractModel):
             },
         ]
 
+        # Real done batches added to history log
+        done_batches = self.env["tekstil.production.batch"].search([
+            ("stage", "=", "done"),
+        ], order="write_date desc", limit=4)
+
+        for b in done_batches:
+            history_list.insert(0, {
+                "id": f"batch_{b.id}",
+                "date": b.write_date.strftime("%Y-%m-%d %H:%M") if b.write_date else today_str,
+                "doc_name": b.name,
+                "partner": b.product_id.display_name,
+                "type": "Ishlab Chiqarish",
+                "type_class": "badge-purple",
+                "details": f"{int(b.packed_qty or b.quantity)} dona {b.product_id.name} tayyor bo'ldi va omborga kirdi",
+                "amount": (b.packed_qty or b.quantity) * b.product_id.list_price,
+                "user": b.current_worker_id.name if b.current_worker_id else "Sex Konveyeri",
+                "status": "Omborga olindi",
+            })
+
         # -------------------------------------------------------------
-        # 6. KONVEYER & BOM (Production Funnel)
+        # 6. KONVEYER & BOM (Production Funnel - 100% REAL DYNAMIC)
         # -------------------------------------------------------------
+        active_batches = self.env["tekstil.production.batch"].search([
+            ("stage", "!=", "done"),
+            ("state", "!=", "cancel"),
+        ], order="id desc")
+
+        c_batches = active_batches.filtered(lambda b: b.stage == "cutting")
+        s_batches = active_batches.filtered(lambda b: b.stage in ["sewing", "subcontract"])
+        i_batches = active_batches.filtered(lambda b: b.stage == "ironing")
+        q_batches = active_batches.filtered(lambda b: b.stage == "qc")
+        p_batches = active_batches.filtered(lambda b: b.stage == "packing")
+
+        c_qty = int(sum(c_batches.mapped("quantity")))
+        s_qty = int(sum(s_batches.mapped("quantity")))
+        i_qty = int(sum(i_batches.mapped("quantity")))
+        q_qty = int(sum(q_batches.mapped("quantity")))
+        p_qty = int(sum(p_batches.mapped("quantity")))
+
+        total_wip = c_qty + s_qty + i_qty + q_qty + p_qty
+        max_stage_qty = max(c_qty, s_qty, i_qty, q_qty, p_qty, 1)
+
+        stage_names = {
+            "cutting": "1. Bichuv sexi",
+            "sewing": "2. Tikuv liniyasi",
+            "subcontract": "3. Sub-pudrat (Bosma/Kashta)",
+            "ironing": "4. Dazmol & Tozalash",
+            "qc": "5. OTK Sifat nazorati",
+            "packing": "6. Qadoqlash & Shtrix",
+        }
+        stage_progress = {
+            "cutting": 20,
+            "sewing": 50,
+            "subcontract": 65,
+            "ironing": 80,
+            "qc": 90,
+            "packing": 95,
+        }
+
+        active_mos = []
+        for b in active_batches:
+            active_mos.append({
+                "name": b.name,
+                "product": b.product_id.name or "Kiyim",
+                "qty": int(b.quantity),
+                "stage": stage_names.get(b.stage, b.stage),
+                "progress": stage_progress.get(b.stage, 50),
+                "status": "Jarayonda",
+            })
+
         conveyor_data = {
-            "cutting_qty": 350,
-            "sewing_qty": 420,
-            "ironing_qty": 280,
-            "qc_qty": 190,
-            "packing_qty": 210,
-            "total_in_progress": 1450,
-            "active_mos": [
-                {
-                    "name": "WH/MO/00001",
-                    "product": "Terra Pro Erkaklar Futbolkasi",
-                    "qty": 500,
-                    "stage": "Qadoqlash",
-                    "progress": 100,
-                    "status": "Bajarildi",
-                },
-                {
-                    "name": "WH/MO/00002",
-                    "product": "Klassik Erkaklar Oq Ko'ylagi",
-                    "qty": 250,
-                    "stage": "Tikish",
-                    "progress": 65,
-                    "status": "Jarayonda",
-                },
-                {
-                    "name": "WH/MO/00003",
-                    "product": "Ayollar Yozgi Ko'ylagi",
-                    "qty": 200,
-                    "stage": "Bichish",
-                    "progress": 30,
-                    "status": "Jarayonda",
-                },
-            ]
+            "cutting_qty": c_qty,
+            "cutting_pct": min(100, int((c_qty / max_stage_qty) * 100)),
+            "sewing_qty": s_qty,
+            "sewing_pct": min(100, int((s_qty / max_stage_qty) * 100)),
+            "ironing_qty": i_qty,
+            "ironing_pct": min(100, int((i_qty / max_stage_qty) * 100)),
+            "qc_qty": q_qty,
+            "qc_pct": min(100, int((q_qty / max_stage_qty) * 100)),
+            "packing_qty": p_qty,
+            "packing_pct": min(100, int((p_qty / max_stage_qty) * 100)),
+            "total_in_progress": total_wip,
+            "active_batches_count": len(active_batches),
+            "active_mos": active_mos,
         }
 
         return {

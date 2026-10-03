@@ -66,6 +66,7 @@
                 <header>
                     <button name="action_start" type="object" string="Konveyerga Chiqarish" class="oe_highlight" invisible="state != 'draft'"/>
                     <button name="action_next_stage" type="object" string="Keyingi Bosqichga O'tkazish" class="btn-success" invisible="state != 'in_progress' or stage == 'done'"/>
+                    <button name="action_previous_stage" type="object" string="Oldingi Bosqichga Qaytarish" class="btn-secondary" invisible="state != 'in_progress' or stage == 'cutting'"/>
                     <field name="stage" widget="statusbar" statusbar_visible="cutting,sewing,subcontract,ironing,qc,packing,done"/>
                 </header>
                 <sheet>

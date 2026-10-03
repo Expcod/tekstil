@@ -179,33 +179,33 @@
                                     <!-- Konveyer Funnel Card -->
                                     <div class="table-card mt-4">
                                         <div class="card-header-styled">
-                                            <h3>🔄 Sex Konveyer Bosqichlari (Jarayonda: 1 450 dona)</h3>
+                                            <h3>🔄 Sex Konveyer Bosqichlari (Jarayonda: <t t-esc="formatNumber(state.data.conveyor.total_in_progress)"/> dona)</h3>
                                         </div>
                                         <div class="funnel-container">
                                             <div class="funnel-stage">
                                                 <div class="funnel-badge badge-blue">1. Bichuv sexi</div>
-                                                <div class="funnel-qty">350 dona</div>
-                                                <div class="funnel-bar"><div class="fill" style="width: 70%;"></div></div>
+                                                <div class="funnel-qty"><t t-esc="formatNumber(state.data.conveyor.cutting_qty)"/> dona</div>
+                                                <div class="funnel-bar"><div class="fill" t-attf-style="width: #{state.data.conveyor.cutting_pct}%;"></div></div>
                                             </div>
                                             <div class="funnel-stage">
                                                 <div class="funnel-badge badge-blue">2. Tikuv liniyasi</div>
-                                                <div class="funnel-qty">420 dona</div>
-                                                <div class="funnel-bar"><div class="fill" style="width: 85%;"></div></div>
+                                                <div class="funnel-qty"><t t-esc="formatNumber(state.data.conveyor.sewing_qty)"/> dona</div>
+                                                <div class="funnel-bar"><div class="fill" t-attf-style="width: #{state.data.conveyor.sewing_pct}%;"></div></div>
                                             </div>
                                             <div class="funnel-stage">
                                                 <div class="funnel-badge badge-blue">3. Dazmol &amp; Tozalash</div>
-                                                <div class="funnel-qty">280 dona</div>
-                                                <div class="funnel-bar"><div class="fill" style="width: 55%;"></div></div>
+                                                <div class="funnel-qty"><t t-esc="formatNumber(state.data.conveyor.ironing_qty)"/> dona</div>
+                                                <div class="funnel-bar"><div class="fill" t-attf-style="width: #{state.data.conveyor.ironing_pct}%;"></div></div>
                                             </div>
                                             <div class="funnel-stage">
                                                 <div class="funnel-badge badge-green">4. OTK Sifat nazorati</div>
-                                                <div class="funnel-qty">190 dona</div>
-                                                <div class="funnel-bar"><div class="fill bg-success" style="width: 40%;"></div></div>
+                                                <div class="funnel-qty"><t t-esc="formatNumber(state.data.conveyor.qc_qty)"/> dona</div>
+                                                <div class="funnel-bar"><div class="fill bg-success" t-attf-style="width: #{state.data.conveyor.qc_pct}%;"></div></div>
                                             </div>
                                             <div class="funnel-stage">
                                                 <div class="funnel-badge badge-purple">5. Qadoqlash &amp; Shtrix</div>
-                                                <div class="funnel-qty">210 dona</div>
-                                                <div class="funnel-bar"><div class="fill bg-purple" style="width: 45%;"></div></div>
+                                                <div class="funnel-qty"><t t-esc="formatNumber(state.data.conveyor.packing_qty)"/> dona</div>
+                                                <div class="funnel-bar"><div class="fill bg-purple" t-attf-style="width: #{state.data.conveyor.packing_pct}%;"></div></div>
                                             </div>
                                         </div>
                                     </div>

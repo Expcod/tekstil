@@ -110,21 +110,122 @@ class TekstilProductionBatch(models.Model):
         string="OTK Tekshiruvlari",
     )
 
+    stock_updated = fields.Boolean(string="Omborga kirim qilindi", default=False, copy=False)
+    raw_consumed = fields.Boolean(string="Xomashyo hisobdan chiqarildi", default=False, copy=False)
+
+    def _update_stock_finished_goods(self):
+        """Partiya tugaganda Tayyor Mahsulot Omboriga (WH/Stock) real kirim qilish"""
+        for rec in self:
+            if rec.stock_updated:
+                continue
+            qty_to_add = rec.packed_qty or rec.qc_passed_qty or rec.quantity
+            if qty_to_add <= 0 or not rec.product_id:
+                continue
+
+            warehouse = self.env["stock.warehouse"].search([("company_id", "=", self.env.company.id)], limit=1)
+            stock_loc = warehouse.lot_stock_id if warehouse else self.env["stock.location"].search([("usage", "=", "internal")], limit=1)
+
+            if stock_loc:
+                self.env["stock.quant"]._update_available_quantity(
+                    rec.product_id,
+                    stock_loc,
+                    qty_to_add,
+                )
+                rec.stock_updated = True
+                rec.message_post(
+                    body=_(
+                        "✅ <b>Tayyor Mahsulot Omboriga Kirim Qilindi!</b><br/>"
+                        "Mahsulot: %s<br/>"
+                        "Miqdor: <b>%s dona</b><br/>"
+                        "Ombor: %s<br/>"
+                        "<i>Real ombor qoldig'i (stock.quant) oshirildi.</i>"
+                    ) % (rec.product_id.display_name, int(qty_to_add), stock_loc.complete_name)
+                )
+
+    def _consume_raw_materials(self):
+        """Bichuv boshlanganda sarflanadigan xomashyoni ombordan hisobdan chiqarish"""
+        for rec in self:
+            if rec.raw_consumed or not rec.product_id:
+                continue
+
+            bom = self.env["mrp.bom"].search([
+                "|",
+                ("product_id", "=", rec.product_id.id),
+                ("product_tmpl_id", "=", rec.product_id.product_tmpl_id.id),
+            ], limit=1)
+
+            warehouse = self.env["stock.warehouse"].search([("company_id", "=", self.env.company.id)], limit=1)
+            stock_loc = warehouse.lot_stock_id if warehouse else self.env["stock.location"].search([("usage", "=", "internal")], limit=1)
+
+            if bom and stock_loc:
+                consumed_notes = []
+                for line in bom.bom_line_ids:
+                    qty_needed = line.product_qty * rec.quantity
+                    if line.product_id and qty_needed > 0:
+                        self.env["stock.quant"]._update_available_quantity(
+                            line.product_id,
+                            stock_loc,
+                            -qty_needed,
+                        )
+                        uom_name = line.product_id.uom_id.name or "birlik"
+                        consumed_notes.append(f"{line.product_id.name}: {qty_needed:.1f} {uom_name}")
+
+                rec.raw_consumed = True
+                if consumed_notes:
+                    rec.message_post(
+                        body=_(
+                            "✂️ <b>Bichuv boshlandi — Xomashyo sarflandi:</b><br/>%s"
+                        ) % ("<br/>".join(consumed_notes))
+                    )
+
     def action_start(self):
         for rec in self:
             rec.state = "in_progress"
             if not rec.cutting_qty:
                 rec.cutting_qty = rec.quantity
+            rec._consume_raw_materials()
 
     def action_next_stage(self):
-        """Partiyani keyingi bosqichga o'tkazish"""
+        """Partiyani keyingi bosqichga o'tkazish va bosqichlar hisobotini to'ldirish"""
         stage_order = ["cutting", "sewing", "subcontract", "ironing", "qc", "packing", "done"]
         for rec in self:
-            current_idx = stage_order.index(rec.stage)
+            if rec.state == "draft":
+                rec.action_start()
+
+            current_idx = stage_order.index(rec.stage) if rec.stage in stage_order else 0
             if current_idx < len(stage_order) - 1:
                 next_stage = stage_order[current_idx + 1]
                 rec.stage = next_stage
-                if next_stage == "done":
+
+                # Bosqichlardagi natijalarni avtomatik to'ldirish
+                if next_stage in ["sewing", "subcontract"]:
+                    if not rec.cutting_qty:
+                        rec.cutting_qty = rec.quantity
+                    if next_stage == "subcontract" and not rec.sewing_qty:
+                        rec.sewing_qty = rec.cutting_qty or rec.quantity
+                elif next_stage == "ironing":
+                    if not rec.sewing_qty:
+                        rec.sewing_qty = rec.cutting_qty or rec.quantity
+                elif next_stage == "qc":
+                    if not rec.ironing_qty:
+                        rec.ironing_qty = rec.sewing_qty or rec.quantity
+                elif next_stage == "packing":
+                    if not rec.qc_passed_qty:
+                        rec.qc_passed_qty = rec.ironing_qty or rec.quantity
+                elif next_stage == "done":
                     rec.state = "done"
                     if not rec.packed_qty:
-                        rec.packed_qty = rec.qc_passed_qty or rec.quantity
+                        rec.packed_qty = rec.qc_passed_qty or rec.ironing_qty or rec.quantity
+                    rec._update_stock_finished_goods()
+
+    def action_previous_stage(self):
+        """Partiyani oldingi bosqichga qaytarish"""
+        stage_order = ["cutting", "sewing", "subcontract", "ironing", "qc", "packing", "done"]
+        for rec in self:
+            if rec.stage in stage_order:
+                current_idx = stage_order.index(rec.stage)
+                if current_idx > 0:
+                    prev_stage = stage_order[current_idx - 1]
+                    rec.stage = prev_stage
+                    if rec.state == "done":
+                        rec.state = "in_progress"
