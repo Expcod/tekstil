@@ -843,28 +843,234 @@
     .tekstil-table {
         width: 100%;
         border-collapse: collapse;
+        background-color: #ffffff !important;
+
+        thead {
+            tr {
+                background-color: #f8fafc !important;
+            }
+        }
 
         th {
-            background: #f8fafc;
-            padding: 11px 16px;
+            background-color: #f8fafc !important;
+            padding: 12px 16px;
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.6px;
-            color: #64748b;
+            color: #64748b !important;
             border-bottom: 1px solid #e2e8f0;
             text-align: left;
+            white-space: nowrap;
         }
 
-        td {
-            padding: 12px 16px;
-            font-size: 13px;
-            color: #1e293b;
-            border-bottom: 1px solid #f1f5f9;
+        tbody {
+            tr {
+                background-color: #ffffff !important;
+                transition: background-color 0.15s ease;
+
+                td {
+                    background-color: #ffffff !important;
+                    padding: 13px 16px;
+                    font-size: 13px;
+                    color: #1e293b !important;
+                    border-bottom: 1px solid #f1f5f9;
+                    vertical-align: middle;
+                }
+
+                &:hover td {
+                    background-color: #f1f5f9 !important;
+                }
+
+                &:last-child td {
+                    border-bottom: none;
+                }
+            }
+        }
+    }
+
+    /* ---------------------------------------------------- */
+    /* REJALASHTIRISH (PLANNING CARDS & ELEMENTS)          */
+    /* ---------------------------------------------------- */
+    .plan-card {
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+        overflow: hidden;
+
+        .plan-card-header {
+            background-color: #ffffff !important;
+            padding: 18px 22px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .plan-title {
+                h4 {
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: #0f172a !important;
+                    margin: 0 0 5px 0;
+                    letter-spacing: -0.2px;
+                }
+                .plan-dates {
+                    font-size: 12px;
+                    color: #64748b !important;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    i {
+                        color: #94a3b8;
+                    }
+                }
+            }
+
+            .plan-meta {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+
+                .plan-progress-info {
+                    text-align: right;
+                    .progress-label {
+                        font-size: 12px;
+                        color: #64748b !important;
+                        margin-bottom: 5px;
+                        strong {
+                            color: #0f172a !important;
+                            font-weight: 700;
+                        }
+                    }
+                    .progress-track {
+                        width: 140px;
+                        height: 8px;
+                        background-color: #e2e8f0 !important;
+                        border-radius: 999px;
+                        overflow: hidden;
+
+                        .progress-fill {
+                            height: 100%;
+                            background-color: #10b981 !important;
+                            border-radius: 999px;
+                        }
+                    }
+                }
+
+                .plan-badge {
+                    font-size: 13px;
+                    font-weight: 700;
+                    padding: 6px 14px;
+                    border-radius: 10px;
+                    background-color: #eff6ff !important;
+                    color: #2563eb !important;
+                    border: 1px solid #dbeafe;
+                }
+            }
         }
 
-        tr:hover td {
-            background: #f8fafc;
+        .plan-card-body {
+            padding: 0;
+            background-color: #ffffff !important;
+
+            .badge-line {
+                display: inline-block;
+                background-color: #f1f5f9 !important;
+                color: #334155 !important;
+                font-weight: 700;
+                font-size: 11px;
+                padding: 4px 8px;
+                border-radius: 6px;
+                border: 1px solid #e2e8f0;
+            }
+
+            .product-name {
+                font-weight: 700;
+                color: #0f172a !important;
+            }
+
+            .product-color {
+                color: #475569 !important;
+            }
+
+            .badge-sizes {
+                display: inline-block;
+                background-color: #f8fafc !important;
+                color: #334155 !important;
+                font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+                font-size: 12px;
+                font-weight: 600;
+                padding: 4px 10px;
+                border-radius: 6px;
+                border: 1px solid #cbd5e1;
+            }
+
+            .planned-qty {
+                font-weight: 700;
+                color: #0f172a !important;
+                font-size: 14px;
+            }
+
+            .produced-qty {
+                font-weight: 700;
+                color: #10b981 !important;
+                font-size: 14px;
+            }
+
+            .completion-cell {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+
+                .progress-track {
+                    flex: 1;
+                    min-width: 80px;
+                    height: 7px;
+                    background-color: #e2e8f0 !important;
+                    border-radius: 999px;
+                    overflow: hidden;
+
+                    .progress-fill {
+                        height: 100%;
+                        background-color: #10b981 !important;
+                        border-radius: 999px;
+                    }
+                }
+
+                .completion-rate {
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: #0f172a !important;
+                    min-width: 44px;
+                    text-align: right;
+                }
+            }
         }
+    }
+
+    /* Brand Order Card */
+    .brand-order-card {
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+        height: 100%;
+    }
+
+    /* Bootstrap Card Overrides within dashboard */
+    .card {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+    }
+    .card-header {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+    }
+    .card-body {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
     }
 }

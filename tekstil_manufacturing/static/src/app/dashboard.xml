@@ -2,9 +2,9 @@
 <templates xml:space="preserve">
     <t t-name="tekstil_manufacturing.Dashboard">
         <div class="o_tekstil_dashboard">
-            <!-- -------------------------------------------------------- -->
+            <!-- ======================================================== -->
             <!-- CHAP SIDEBAR (ASOSIY NAVIGATSIYA)                       -->
-            <!-- -------------------------------------------------------- -->
+            <!-- ======================================================== -->
             <aside class="tekstil-sidebar">
                 <div class="sidebar-brand">
                     <div class="brand-badge">
@@ -76,9 +76,9 @@
                 </div>
             </aside>
 
-            <!-- -------------------------------------------------------- -->
+            <!-- ======================================================== -->
             <!-- O'NG MAYDON (ASOSIY ISH MAYDONI)                         -->
-            <!-- -------------------------------------------------------- -->
+            <!-- ======================================================== -->
             <main class="tekstil-main">
                 <!-- Topbar -->
                 <header class="tekstil-topbar">
@@ -328,25 +328,25 @@
                                 </div>
 
                                 <t t-foreach="state.data.plans" t-as="plan" t-key="plan.id">
-                                    <div class="card mb-4 border-0 shadow-sm rounded-4 overflow-hidden">
-                                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-                                            <div>
-                                                <h5 class="mb-0 fw-bold text-dark" t-esc="plan.name"/>
-                                                <span class="text-muted small"><i class="fa fa-clock-o"/> <t t-esc="plan.date_start"/> dan <t t-esc="plan.date_end"/> gacha</span>
+                                    <div class="plan-card">
+                                        <div class="plan-card-header">
+                                            <div class="plan-title">
+                                                <h4 t-esc="plan.name"/>
+                                                <span class="plan-dates"><i class="fa fa-clock-o"/> <t t-esc="plan.date_start"/> dan <t t-esc="plan.date_end"/> gacha</span>
                                             </div>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="text-end">
-                                                    <div class="small text-muted">Bajarilish: <t t-esc="plan.produced_qty"/> / <t t-esc="plan.target_qty"/> dona</div>
-                                                    <div class="progress" style="width: 140px; height: 8px;">
-                                                        <div class="progress-bar bg-success" role="progressbar" t-att-style="'width:' + plan.completion_rate + '%'"/>
+                                            <div class="plan-meta">
+                                                <div class="plan-progress-info">
+                                                    <div class="progress-label">Bajarilish: <strong><t t-esc="plan.produced_qty"/></strong> / <t t-esc="plan.target_qty"/> dona</div>
+                                                    <div class="progress-track">
+                                                        <div class="progress-fill" t-att-style="'width:' + plan.completion_rate + '%'"/>
                                                     </div>
                                                 </div>
-                                                <span class="badge bg-primary fs-6 px-3 py-2"><t t-esc="plan.completion_rate"/>%</span>
+                                                <span class="plan-badge"><t t-esc="plan.completion_rate"/>%</span>
                                             </div>
                                         </div>
 
-                                        <div class="card-body p-0">
-                                            <table class="tekstil-table mb-0">
+                                        <div class="plan-card-body">
+                                            <table class="tekstil-table">
                                                 <thead>
                                                     <tr>
                                                         <th>Liniya / Sex</th>
@@ -361,18 +361,18 @@
                                                 <tbody>
                                                     <t t-foreach="plan.lines" t-as="l" t-key="l.id">
                                                         <tr>
-                                                            <td><span class="badge bg-light text-dark"><t t-esc="l.line_code"/></span></td>
-                                                            <td class="fw-bold" t-esc="l.product_name"/>
-                                                            <td><t t-esc="l.color"/></td>
-                                                            <td><span class="badge bg-secondary font-monospace" t-esc="l.sizes"/></td>
-                                                            <td class="fw-bold"><t t-esc="l.planned_qty"/></td>
-                                                            <td class="fw-bold text-success"><t t-esc="l.produced_qty"/></td>
+                                                            <td><span class="badge-line" t-esc="l.line_code"/></td>
+                                                            <td class="product-name" t-esc="l.product_name"/>
+                                                            <td class="product-color" t-esc="l.color"/>
+                                                            <td><span class="badge-sizes" t-esc="l.sizes"/></td>
+                                                            <td class="planned-qty" t-esc="l.planned_qty"/>
+                                                            <td class="produced-qty" t-esc="l.produced_qty"/>
                                                             <td>
-                                                                <div class="d-flex align-items-center gap-2">
-                                                                    <div class="progress flex-grow-1" style="height: 6px;">
-                                                                        <div class="progress-bar bg-success" t-att-style="'width:' + l.completion_rate + '%'"/>
+                                                                <div class="completion-cell">
+                                                                    <div class="progress-track">
+                                                                        <div class="progress-fill" t-att-style="'width:' + l.completion_rate + '%'"/>
                                                                     </div>
-                                                                    <span class="small fw-bold" t-esc="l.completion_rate + '%'"/>
+                                                                    <span class="completion-rate" t-esc="l.completion_rate + '%'"/>
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -637,7 +637,7 @@
                                 <div class="row">
                                     <t t-foreach="state.data.brand_orders" t-as="o" t-key="o.id">
                                         <div class="col-md-6 mb-4">
-                                            <div class="card h-100 border-0 shadow-sm rounded-4 p-3">
+                                            <div class="brand-order-card">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <span class="badge bg-primary fs-6 px-3 py-1" t-esc="o.brand_name"/>
                                                     <span class="badge bg-light text-dark" t-esc="o.name"/>

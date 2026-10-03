@@ -209,50 +209,56 @@ class TekstilDashboardService(models.AbstractModel):
         }
 
     @api.model
-    def tablet_submit_output(self, employee_id=None, batch_id=None, operation_name="", quantity=0.0, department="sewing", piece_rate=1500.0, **kwargs):
+    def tablet_submit_output(self, *args, **kwargs):
         """Planshetdan xodim natijasini saqlash"""
-        emp_id = employee_id or kwargs.get("employee_id")
-        b_id = batch_id or kwargs.get("batch_id")
-        op_name = operation_name or kwargs.get("operation_name", "Operatsiya")
-        qty = quantity or kwargs.get("quantity", 0.0)
-        dept = department or kwargs.get("department", "sewing")
-        rate = piece_rate or kwargs.get("piece_rate", 1500.0)
+        emp_id = args[0] if len(args) > 0 else kwargs.get("employee_id")
+        b_id = args[1] if len(args) > 1 else kwargs.get("batch_id")
+        op_name = args[2] if len(args) > 2 else kwargs.get("operation_name", "Operatsiya")
+        qty = args[3] if len(args) > 3 else kwargs.get("quantity", 0.0)
+        dept = args[4] if len(args) > 4 else kwargs.get("department", "sewing")
+        rate = args[5] if len(args) > 5 else kwargs.get("piece_rate", 1500.0)
+
+        if not emp_id or not b_id:
+            raise UserError(_("Xodim yoki partiya tanlanmagan!"))
 
         return self.env["tekstil.worker.output"].register_tablet_output(
-            employee_id=emp_id,
-            batch_id=b_id,
-            operation_name=op_name,
-            quantity=qty,
-            department=dept,
-            piece_rate=rate,
+            employee_id=int(emp_id),
+            batch_id=int(b_id),
+            operation_name=str(op_name or "Operatsiya"),
+            quantity=float(qty or 0.0),
+            department=str(dept or "sewing"),
+            piece_rate=float(rate or 1500.0),
         )
 
     @api.model
-    def qc_submit_check(self, batch_id=None, inspected_qty=0.0, grade_1_qty=0.0, grade_2_qty=0.0, rework_qty=0.0, reject_qty=0.0, defect_type_ids=None, note="", **kwargs):
+    def qc_submit_check(self, *args, **kwargs):
         """OTK Sifat nazoratini tezkor kiritish"""
-        b_id = batch_id or kwargs.get("batch_id")
-        insp_qty = inspected_qty or kwargs.get("inspected_qty", 0.0)
-        g1_qty = grade_1_qty or kwargs.get("grade_1_qty", 0.0)
-        g2_qty = grade_2_qty or kwargs.get("grade_2_qty", 0.0)
-        rew_qty = rework_qty or kwargs.get("rework_qty", 0.0)
-        rej_qty = reject_qty or kwargs.get("reject_qty", 0.0)
-        def_ids = defect_type_ids if defect_type_ids is not None else kwargs.get("defect_type_ids", [])
-        qc_note = note or kwargs.get("note", "")
+        b_id = args[0] if len(args) > 0 else kwargs.get("batch_id")
+        insp_qty = args[1] if len(args) > 1 else kwargs.get("inspected_qty", 0.0)
+        g1_qty = args[2] if len(args) > 2 else kwargs.get("grade_1_qty", 0.0)
+        g2_qty = args[3] if len(args) > 3 else kwargs.get("grade_2_qty", 0.0)
+        rew_qty = args[4] if len(args) > 4 else kwargs.get("rework_qty", 0.0)
+        rej_qty = args[5] if len(args) > 5 else kwargs.get("reject_qty", 0.0)
+        def_ids = args[6] if len(args) > 6 else kwargs.get("defect_type_ids", [])
+        qc_note = args[7] if len(args) > 7 else kwargs.get("note", "")
 
-        batch = self.env["tekstil.production.batch"].browse(b_id)
+        if not b_id:
+            raise UserError(_("Partiya tanlanmagan!"))
+
+        batch = self.env["tekstil.production.batch"].browse(int(b_id))
         if not batch.exists():
             raise UserError(_("Partiya topilmadi!"))
 
         qc = self.env["tekstil.quality.check"].create({
-            "batch_id": b_id,
-            "inspected_qty": insp_qty,
-            "grade_1_qty": g1_qty,
-            "grade_2_qty": g2_qty,
-            "rework_qty": rew_qty,
-            "reject_qty": rej_qty,
+            "batch_id": int(b_id),
+            "inspected_qty": float(insp_qty or 0.0),
+            "grade_1_qty": float(g1_qty or 0.0),
+            "grade_2_qty": float(g2_qty or 0.0),
+            "rework_qty": float(rew_qty or 0.0),
+            "reject_qty": float(rej_qty or 0.0),
             "defect_type_ids": [(6, 0, def_ids or [])],
-            "defect_note": qc_note,
-            "state": "passed" if g1_qty >= (insp_qty * 0.9) else "rework",
+            "defect_note": str(qc_note or ""),
+            "state": "passed" if float(g1_qty or 0.0) >= (float(insp_qty or 1.0) * 0.9) else "rework",
         })
         qc.action_pass() if qc.state == "passed" else qc.action_rework()
 
@@ -264,12 +270,12 @@ class TekstilDashboardService(models.AbstractModel):
         }
 
     @api.model
-    def batch_move_next_stage(self, batch_id=None, *args, **kwargs):
+    def batch_move_next_stage(self, *args, **kwargs):
         """Partiyani konveyer bo'yicha keyingi bosqichga o'tkazish"""
-        bid = batch_id or (args[0] if args else None) or kwargs.get("batch_id")
+        bid = args[0] if len(args) > 0 else kwargs.get("batch_id")
         if not bid:
             raise UserError(_("Partiya identifikatori ko'rsatilmadi!"))
-        batch = self.env["tekstil.production.batch"].browse(bid)
+        batch = self.env["tekstil.production.batch"].browse(int(bid))
         if not batch.exists():
             raise UserError(_("Partiya topilmadi!"))
         batch.action_next_stage()
